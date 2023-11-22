@@ -5,7 +5,7 @@ using namespace System.Collections.Specialized
 using namespace System.Text
 using namespace System.Security
 param(
-    [Parameter(Mandatory=$false, Position=0)]
+    [Parameter(Mandatory = $false, Position = 0)]
     [hashtable]$OverrideModuleConfig = @{}
 )
 # This module contains many cmdlets which may be used in different scenarios. Since the purpose 
@@ -50,7 +50,7 @@ function Get-IsElevatedSession {
     [CmdletBinding()]
     param()
 
-    switch((Get-OSPlatform)) {
+    switch ((Get-OSPlatform)) {
         "Windows" {
             $currentPrincipal = [Security.Principal.WindowsPrincipal]::new(
                 [Security.Principal.WindowsIdentity]::GetCurrent())
@@ -116,7 +116,8 @@ function Get-OSPlatform {
 
     if ($PSVersionTable.PSEdition -eq "Desktop") {
         return "Windows"
-    } else {
+    }
+    else {
         $windows = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform(
             [System.Runtime.InteropServices.OSPlatform]::Windows)
 
@@ -181,12 +182,13 @@ function Get-IsDomainJoined {
     [CmdletBinding()]
     param()
 
-    switch((Get-OSPlatform)) {
+    switch ((Get-OSPlatform)) {
         "Windows" {
             $computer = Get-CimInstance -ClassName "win32_computersystem"
             if ($computer.PartOfDomain) {
                 Write-Verbose -Message "Session is running in a domain-joined environment."
-            } else {
+            }
+            else {
                 Write-Verbose -Message "Session is not running in a domain-joined environment."
             }
 
@@ -214,8 +216,8 @@ function Assert-IsDomainJoined {
 
     if (!(Get-IsDomainJoined)) {
         Write-Error `
-                -Message "The cmdlet, script, or module must be run in a domain-joined environment." `
-                -ErrorAction Stop
+            -Message "The cmdlet, script, or module must be run in a domain-joined environment." `
+            -ErrorAction Stop
     }
 }
 
@@ -233,17 +235,17 @@ function Assert-IsNativeAD {
 
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory=$true, Position=0, ParameterSetName="StorageAccountName")]
+        [Parameter(Mandatory = $true, Position = 0, ParameterSetName = "StorageAccountName")]
         [string]$ResourceGroupName,
 
-        [Parameter(Mandatory=$true, Position=1, ParameterSetName="StorageAccountName")]
+        [Parameter(Mandatory = $true, Position = 1, ParameterSetName = "StorageAccountName")]
         [string]$StorageAccountName,
 
         [Parameter(
-            Mandatory=$true, 
-            Position=0, 
-            ParameterSetName="StorageAccount", 
-            ValueFromPipeline=$true)]
+            Mandatory = $true, 
+            Position = 0, 
+            ParameterSetName = "StorageAccount", 
+            ValueFromPipeline = $true)]
         [Microsoft.Azure.Commands.Management.Storage.Models.PSStorageAccount]$StorageAccount
     )
 
@@ -256,8 +258,7 @@ function Assert-IsNativeAD {
 
     $DirectoryServiceOptions = Get-DirectoryServiceOptions -StorageAccount $StorageAccount
 
-    if ("AD" -ne $DirectoryServiceOptions)
-    {
+    if ("AD" -ne $DirectoryServiceOptions) {
         Write-Error -ErrorAction Stop -Message (
             "The cmdlet is stopped due to the storage account '$($StorageAccount.StorageAccountName)' having the DirectoryServiceOptions value: '$DirectoryServiceOptions'. " +
             "The DirectoryServiceOptions for the account needs to be 'AD' in order to run the cmdlet."
@@ -279,17 +280,17 @@ function Assert-IsUnconfiguredOrNativeAD {
 
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory=$true, Position=0, ParameterSetName="StorageAccountName")]
+        [Parameter(Mandatory = $true, Position = 0, ParameterSetName = "StorageAccountName")]
         [string]$ResourceGroupName,
 
-        [Parameter(Mandatory=$true, Position=1, ParameterSetName="StorageAccountName")]
+        [Parameter(Mandatory = $true, Position = 1, ParameterSetName = "StorageAccountName")]
         [string]$StorageAccountName,
 
         [Parameter(
-            Mandatory=$true, 
-            Position=0, 
-            ParameterSetName="StorageAccount", 
-            ValueFromPipeline=$true)]
+            Mandatory = $true, 
+            Position = 0, 
+            ParameterSetName = "StorageAccount", 
+            ValueFromPipeline = $true)]
         [Microsoft.Azure.Commands.Management.Storage.Models.PSStorageAccount]$StorageAccount
     )
 
@@ -304,13 +305,12 @@ function Assert-IsUnconfiguredOrNativeAD {
 
     if (
         $null -ne $DirectoryServiceOptions -and `
-        "None" -ne $DirectoryServiceOptions -and `
-        "AD" -ne $DirectoryServiceOptions
-    )
-    {
+            "None" -ne $DirectoryServiceOptions -and `
+            "AD" -ne $DirectoryServiceOptions
+    ) {
         Write-Error -ErrorAction Stop -Message (
             "The cmdlet is stopped due to the storage account '$($StorageAccount.StorageAccountName)' having the DirectoryServiceOptions value: '$DirectoryServiceOptions'. " +
-             "The DirectoryServiceOptions for the account needs to be 'AD', 'None' or null in order to run the cmdlet."
+            "The DirectoryServiceOptions for the account needs to be 'AD', 'None' or null in order to run the cmdlet."
         )
     }
 }
@@ -318,7 +318,7 @@ function Assert-IsUnconfiguredOrNativeAD {
 function Get-DirectoryServiceOptions {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
+        [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true)]
         [Microsoft.Azure.Commands.Management.Storage.Models.PSStorageAccount]$StorageAccount
     )
 
@@ -341,12 +341,11 @@ function Assert-IsSupportedDistinguishedName {
     
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory=$true, Position=0)]
+        [Parameter(Mandatory = $true, Position = 0)]
         [string]$DistinguishedName
     )
 
-    if ($DistinguishedName.Contains('*'))
-    {
+    if ($DistinguishedName.Contains('*')) {
         Write-Error -Message "Unsupported: There is a '*' character in the DistinguishedName." -ErrorAction Stop
     }   
 }
@@ -368,7 +367,7 @@ function Get-OSVersion {
     [CmdletBinding()]
     param()
 
-    switch((Get-OSPlatform)) {
+    switch ((Get-OSPlatform)) {
         "Windows" {
             return [System.Environment]::OSVersion.Version
         }
@@ -412,8 +411,8 @@ function Get-WindowsInstallationType {
     Assert-IsWindows
 
     $installType = Get-ItemProperty `
-            -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\" `
-            -Name InstallationType | `
+        -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\" `
+        -Name InstallationType | `
         Select-Object -ExpandProperty InstallationType
     
     return $installType
@@ -428,8 +427,8 @@ function Assert-IsWindowsServer {
     $installationType = Get-WindowsInstallationType
     if ($installationType -ne "Server" -and $installationType -ne "Server Core") {
         Write-Error `
-                -Message "The cmdlet, script, or module must be run on a Windows Server installation." `
-                -ErrorAction Stop
+            -Message "The cmdlet, script, or module must be run on a Windows Server installation." `
+            -ErrorAction Stop
     }
 }
 
@@ -502,18 +501,18 @@ function Get-OSFeature {
     [CmdletBinding()]
     param()
 
-    switch((Get-OSPlatform)) {
+    switch ((Get-OSPlatform)) {
         "Windows" {
             $winVer = Get-OSVersion
 
-            switch((Get-WindowsInstallationType)) {
+            switch ((Get-WindowsInstallationType)) {
                 "Client" {
                     # Windows client only allows the underlying cmdlets to run if the session
                     # is elevated, therefore this check is added.
                     Assert-IsElevatedSession
 
                     # WindowsCapabilities are only available on Windows 10.
-                    if ($winVer -ge [Version]::new(10,0,0,0)) {
+                    if ($winVer -ge [Version]::new(10, 0, 0, 0)) {
                         # Get-WindowsCapability appends additional fields to the actual name of the feature, ex.
                         # Rsat.ActiveDirectory.DS-LDS.Tools~~~~0.0.1.0. This code strips that out to hopefully get
                         # to something easier to use. This behavior may be changed in the future. Features exposed
@@ -522,44 +521,45 @@ function Get-OSFeature {
                         # if they are.
                         $features = Get-WindowsCapability -Online | `
                             Select-Object `
-                                @{ Name= "InternalName"; Expression = { $_.Name } },
-                                @{ Name = "Name"; Expression = { $_.Name.Split("~")[0] } },
-                                @{ Name = "Field1"; Expression = { $_.Name.Split("~")[1] } }, 
-                                @{ Name = "Field2"; Expression = { $_.Name.Split("~")[2] } },
-                                @{ Name = "Language"; Expression = { $_.Name.Split("~")[3] } },
-                                @{ Name = "Version"; Expression = { $_.Name.Split("~")[4] } },
-                                @{ Name = "Installed"; Expression = { $_.State -eq "Installed" } } | `
+                        @{ Name = "InternalName"; Expression = { $_.Name } },
+                        @{ Name = "Name"; Expression = { $_.Name.Split("~")[0] } },
+                        @{ Name = "Field1"; Expression = { $_.Name.Split("~")[1] } }, 
+                        @{ Name = "Field2"; Expression = { $_.Name.Split("~")[2] } },
+                        @{ Name = "Language"; Expression = { $_.Name.Split("~")[3] } },
+                        @{ Name = "Version"; Expression = { $_.Name.Split("~")[4] } },
+                        @{ Name = "Installed"; Expression = { $_.State -eq "Installed" } } | `
                             ForEach-Object {
-                                if (![string]::IsNullOrEmpty($_.Language)) {
-                                    $Name = ($_.Name + "-" + $_.Language)
-                                } else {
-                                    $Name = $_.Name
-                                }
-
-                                [OSFeature]::new(
-                                    $Name, 
-                                    $_.InternalName, 
-                                    $_.Version, 
-                                    $_.Installed, 
-                                    [OSFeatureKind]::WindowsClientCapability)
+                            if (![string]::IsNullOrEmpty($_.Language)) {
+                                $Name = ($_.Name + "-" + $_.Language)
                             }
+                            else {
+                                $Name = $_.Name
+                            }
+
+                            [OSFeature]::new(
+                                $Name, 
+                                $_.InternalName, 
+                                $_.Version, 
+                                $_.Installed, 
+                                [OSFeatureKind]::WindowsClientCapability)
+                        }
                     }
 
                     # Features exposed via Get-WindowsOptionalFeature aren't versioned independently of the OS. 
                     # Updates may occur to these features, but happen inside of the normal OS process. 
                     $features += Get-WindowsOptionalFeature -Online | 
-                        Select-Object `
-                            @{ Name = "InternalName"; Expression = { $_.FeatureName } }, 
-                            @{ Name = "Name"; Expression = { $_.FeatureName } }, 
-                            @{ Name = "Installed"; Expression = { $_.State -eq "Enabled" } } | `
+                    Select-Object `
+                    @{ Name = "InternalName"; Expression = { $_.FeatureName } }, 
+                    @{ Name = "Name"; Expression = { $_.FeatureName } }, 
+                    @{ Name = "Installed"; Expression = { $_.State -eq "Enabled" } } | `
                         ForEach-Object {
-                            [OSFeature]::new(
-                                $_.Name, 
-                                $_.InternalName, 
-                                $winVer, 
-                                $_.Installed, 
-                                [OSFeatureKind]::WindowsClientOptionalFeature)
-                        }
+                        [OSFeature]::new(
+                            $_.Name, 
+                            $_.InternalName, 
+                            $winVer, 
+                            $_.Installed, 
+                            [OSFeatureKind]::WindowsClientOptionalFeature)
+                    }
                 }
 
                 { ($_ -eq "Server") -or ($_ -eq "Server Core") } {
@@ -570,13 +570,13 @@ function Get-OSFeature {
                     $features = Get-WindowsFeature | `
                         Select-Object Name, Installed | `
                         ForEach-Object {
-                            [OSFeature]::new(
-                                $_.Name, 
-                                $_.Name, 
-                                $winVer, 
-                                $_.Installed, 
-                                [OSFeatureKind]::WindowsServerFeature)
-                        }
+                        [OSFeature]::new(
+                            $_.Name, 
+                            $_.Name, 
+                            $winVer, 
+                            $_.Installed, 
+                            [OSFeatureKind]::WindowsServerFeature)
+                    }
                 }
             }
         }
@@ -617,7 +617,7 @@ function Install-OSFeature {
     [CmdletBinding()]
     
     param(
-        [Parameter(Mandatory=$true, ParameterSetName="OSFeature", ValueFromPipeline=$true)]
+        [Parameter(Mandatory = $true, ParameterSetName = "OSFeature", ValueFromPipeline = $true)]
         [OSFeature[]]$OSFeature
     )
 
@@ -627,16 +627,17 @@ function Install-OSFeature {
                 Assert-IsElevatedSession
                 $winVer = Get-OSVersion
 
-                switch((Get-WindowsInstallationType)) {
+                switch ((Get-WindowsInstallationType)) {
                     "Client" {
-                        if ($winVer -ge [version]::new(10,0,0,0)) {
+                        if ($winVer -ge [version]::new(10, 0, 0, 0)) {
                             $OSFeature | `
                                 Where-Object { !$_.Installed } | `
                                 Where-Object { $_.FeatureKind -eq [OSFeatureKind]::WindowsClientCapability } | `
                                 Select-Object @{ Name = "Name"; Expression = { $_.InternalOSName } } | `
                                 Add-WindowsCapability -Online | `
                                 Out-Null
-                        } else {
+                        }
+                        else {
                             $foundCapabilities = $OSFeature | `
                                 Where-Object { $_.FeatureKind -eq [OSFeatureKind]::WindowsClientCapability }
                             
@@ -706,13 +707,13 @@ function Request-OSFeature {
     [CmdletBinding()]
     
     param(
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string[]]$WindowsClientCapability,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string[]]$WindowsClientOptionalFeature,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string[]]$WindowsServerFeature
     )
 
@@ -720,9 +721,9 @@ function Request-OSFeature {
     $foundFeatures = @()
     $notFoundFeatures = @()
 
-    switch((Get-OSPlatform)) {
+    switch ((Get-OSPlatform)) {
         "Windows" {
-            switch((Get-WindowsInstallationType)) {
+            switch ((Get-WindowsInstallationType)) {
                 "Client" {
                     $foundFeatures += $features | `
                         Where-Object { $_.Name -in $WindowsClientCapability -or $_.Name -in $WindowsClientOptionalFeature } 
@@ -766,7 +767,7 @@ function Request-OSFeature {
     if ($null -ne $notFoundFeatures -and $notFoundFeatures.Length -gt 0) {
         $notFoundBuilder = [StringBuilder]::new()
         $notFoundBuilder.Append("The following features could not be found: ") | Out-Null
-        for($i=0; $i -lt $notFoundFeatures.Length; $i++) {
+        for ($i = 0; $i -lt $notFoundFeatures.Length; $i++) {
             if ($i -gt 0) {
                 $notFoundBuilder.Append(", ") | Out-Null
             }
@@ -781,13 +782,13 @@ function Request-OSFeature {
 function Assert-OSFeature {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string[]]$WindowsClientCapability,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string[]]$WindowsClientOptionalFeature,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string[]]$WindowsServerFeature
     )
 
@@ -795,7 +796,7 @@ function Assert-OSFeature {
     $foundFeatures = @()
     $notFoundFeatures = @()
 
-    switch((Get-OSPlatform)) {
+    switch ((Get-OSPlatform)) {
         "Windows" {
             switch ((Get-WindowsInstallationType)) {
                 "Client" {
@@ -844,7 +845,7 @@ function Assert-OSFeature {
         $errorBuilder = [StringBuilder]::new()
         $errorBuilder.Append("The following features could not be found: ") | Out-Null
 
-        $i=0
+        $i = 0
         $notFoundFeatures | ForEach-Object { 
             if ($i -gt 0) {
                 $errorBuilder.Append(", ") | Out-Null
@@ -880,8 +881,8 @@ function Request-ADFeature {
         # OS build revision number, require manual installation of the RSAT package as indicated in the error message.
         if ((Get-WindowsInstallationType) -eq "Client" -and (Get-OSVersion) -lt [Version]::new(10, 0, 18362, 0)) {
             Write-Error `
-                    -Message "This PowerShell module requires the ActiveDirectory RSAT module. On versions of Windows 10 prior to 1809, RSAT can be downloaded via https://www.microsoft.com/download/details.aspx?id=45520." `
-                    -ErrorAction Stop
+                -Message "This PowerShell module requires the ActiveDirectory RSAT module. On versions of Windows 10 prior to 1809, RSAT can be downloaded via https://www.microsoft.com/download/details.aspx?id=45520." `
+                -ErrorAction Stop
         }
 
         Request-OSFeature `
@@ -896,13 +897,13 @@ function Request-ADFeature {
 }
 
 function Request-PowerShellGetModule {
-    [CmdletBinding(SupportsShouldProcess, ConfirmImpact="High")]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = "High")]
     param()
 
     $psGetModule = Get-Module -Name PowerShellGet -ListAvailable | `
         Sort-Object -Property Version -Descending
 
-    if ($null -eq $psGetModule -or $psGetModule[0].Version -lt [Version]::new(1,6,0)) {
+    if ($null -eq $psGetModule -or $psGetModule[0].Version -lt [Version]::new(1, 6, 0)) {
         $caption = "Install updated version of PowerShellGet"
         $verboseConfirmMessage = "This module requires PowerShellGet 1.6.0+. This can be installed now if you are running as an administrator. At the end of the installation, importing this module will fail as you must close all open instances of PowerShell for the updated version of PowerShellGet to be available."
         
@@ -916,12 +917,13 @@ function Request-PowerShellGetModule {
                 Install-PackageProvider -Name NuGet -Force | Out-Null
     
                 Install-Module `
-                        -Name PowerShellGet `
-                        -Repository PSGallery `
-                        -Force `
-                        -ErrorAction Stop `
-                        -SkipPublisherCheck
-            } catch {
+                    -Name PowerShellGet `
+                    -Repository PSGallery `
+                    -Force `
+                    -ErrorAction Stop `
+                    -SkipPublisherCheck
+            }
+            catch {
                 Write-Error -Message "PowerShellGet was not successfully installed, and is a requirement of this module. See https://docs.microsoft.com/powershell/scripting/gallery/installing-psget for information on how to manually troubleshoot the PowerShellGet installation." -ErrorAction Stop
             }             
             
@@ -935,7 +937,7 @@ function Request-PowerShellGetModule {
 }
 
 function Request-MSGraphModule {
-    [CmdletBinding(SupportsShouldProcess, ConfirmImpact="High")]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = "High")]
     param()
 
     $requiredModules = @("Microsoft.Graph.Users", "Microsoft.Graph.Groups", "Microsoft.Graph.Identity.DirectoryManagement")
@@ -956,8 +958,8 @@ function Request-MSGraphModule {
         if ($PSCmdlet.ShouldProcess($verboseConfirmMessage, $verboseConfirmMessage, $caption)) {
             if (!(Get-IsElevatedSession)) {
                 Write-Error `
-                        -Message "To install the missing Microsoft.Graph modules, you must run this cmdlet as an administrator. This cmdlet may not generally require administrator privileges." `
-                        -ErrorAction Stop
+                    -Message "To install the missing Microsoft.Graph modules, you must run this cmdlet as an administrator. This cmdlet may not generally require administrator privileges." `
+                    -ErrorAction Stop
             }
             
             Write-Host "Installing missing modules: $($missingModules -join ', ')"
@@ -975,21 +977,22 @@ function Request-MSGraphModule {
 }
 
 function Request-AzPowerShellModule {
-    [CmdletBinding(SupportsShouldProcess, ConfirmImpact="High")]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = "High")]
     param()
 
     # There is an known issue where versions less than PS 6.2 don't have the Az rollup module installed:
     # https://github.com/Azure/azure-powershell/issues/9835 
-    if ($PSVersionTable.PSVersion -gt [Version]::new(6,2)) {
+    if ($PSVersionTable.PSVersion -gt [Version]::new(6, 2)) {
         $azModule = Get-Module -Name Az -ListAvailable
-    } else {
+    }
+    else {
         $azModule = Get-Module -Name Az.* -ListAvailable
     }
 
     $storageModule = Get-Module -Name Az.Storage -ListAvailable | `
         Where-Object { 
-            $_.Version -ge [Version]::new(4,3,0) 
-        }
+        $_.Version -ge [Version]::new(4, 3, 0) 
+    }
 
     # Do should process if modules must be installed
     if ($null -eq $azModule -or $null -eq $storageModule) {
@@ -999,8 +1002,8 @@ function Request-AzPowerShellModule {
         if ($PSCmdlet.ShouldProcess($verboseConfirmMessage, $verboseConfirmMessage, $caption)) {
             if (!(Get-IsElevatedSession)) {
                 Write-Error `
-                        -Message "To install the required Azure PowerShell modules, you must run this module as an administrator. This module does not generally require administrator privileges." `
-                        -ErrorAction Stop
+                    -Message "To install the required Azure PowerShell modules, you must run this module as an administrator. This module does not generally require administrator privileges." `
+                    -ErrorAction Stop
             }
 
             if ($null -eq $azModule) {
@@ -1011,29 +1014,30 @@ function Request-AzPowerShellModule {
 
             if ($null -eq $storageModule) {
                 Remove-Module `
-                        -Name Az.Storage `
-                        -Force `
-                        -ErrorAction SilentlyContinue
+                    -Name Az.Storage `
+                    -Force `
+                    -ErrorAction SilentlyContinue
                 
                 try {
                     Uninstall-Module `
-                            -Name Az.Storage `
-                            -Force `
-                            -ErrorAction SilentlyContinue
-                } catch {
+                        -Name Az.Storage `
+                        -Force `
+                        -ErrorAction SilentlyContinue
+                }
+                catch {
                     Write-Error `
-                            -Message "Unable to uninstall the existing Az.Storage module which has a version lower than 2.0.0." `
-                            -ErrorAction Stop
+                        -Message "Unable to uninstall the existing Az.Storage module which has a version lower than 2.0.0." `
+                        -ErrorAction Stop
                 }
 
                 Install-Module `
-                        -Name Az.Storage `
-                        -Repository PSGallery `
-                        -AllowClobber `
-                        -Force `
-                        -MinimumVersion "4.3.0" `
-                        -SkipPublisherCheck `
-                        -ErrorAction Stop
+                    -Name Az.Storage `
+                    -Repository PSGallery `
+                    -AllowClobber `
+                    -Force `
+                    -MinimumVersion "4.3.0" `
+                    -SkipPublisherCheck `
+                    -ErrorAction Stop
             }       
         }
     }
@@ -1044,11 +1048,11 @@ function Request-AzPowerShellModule {
     Remove-Module -Name Az.Accounts -Force -ErrorAction SilentlyContinue
     Remove-Module -Name Az.Network -Force -ErrorAction SilentlyContinue
 
-    $storageModule = ,(Get-Module -Name Az.Storage -ListAvailable | `
-        Where-Object { 
-            $_.Version -ge [Version]::new(4,3,0) 
+    $storageModule = , (Get-Module -Name Az.Storage -ListAvailable | `
+            Where-Object { 
+            $_.Version -ge [Version]::new(4, 3, 0) 
         } | `
-        Sort-Object -Property Version -Descending)
+            Sort-Object -Property Version -Descending)
 
     Import-Module -ModuleInfo $storageModule[0] -Global -ErrorAction Stop
     Import-Module -Name Az.Network -Global -ErrorAction Stop
@@ -1071,7 +1075,7 @@ function Assert-DotNetFrameworkVersion {
 
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet(
             "Framework4.5", 
             "Framework4.5.1",
@@ -1092,30 +1096,30 @@ function Assert-DotNetFrameworkVersion {
         Where-Object { $_.PSChildName -eq "v4" }
     if ($null -eq $v4) {
         Write-Error `
-                -Message "This module/cmdlet requires at least .NET 4.0 to be installed." `
-                -ErrorAction Stop
+            -Message "This module/cmdlet requires at least .NET 4.0 to be installed." `
+            -ErrorAction Stop
     }
 
     $full = Get-ChildItem -Path "HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4" | `
         Where-Object { $_.PSChildName -eq "Full" }
     if ($null -eq $full) {
         Write-Error `
-                -Message "This module/cmdlet requires at least .NET 4.5 to be installed." `
-                -ErrorAction Stop
+            -Message "This module/cmdlet requires at least .NET 4.5 to be installed." `
+            -ErrorAction Stop
     }
 
     $release = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full" | `
         Select-Object -ExpandProperty Release
     if ($null -eq $release) {
         Write-Error `
-                -Message "The Release property is not set at HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full." `
-                -ErrorAction Stop
+            -Message "The Release property is not set at HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full." `
+            -ErrorAction Stop
     }
 
     $minimumVersionMet = $false
 
     # Logic taken from: https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#query-the-registry-using-code
-    switch($DotNetFrameworkVersion) {
+    switch ($DotNetFrameworkVersion) {
         "Framework4.5" {
             if ($release -ge 378389) {
                 $minimumVersionMet = $true
@@ -1179,8 +1183,8 @@ function Assert-DotNetFrameworkVersion {
 
     if (!$minimumVersionMet) {
         Write-Error `
-                -Message "This module/cmdlet requires at least .NET $DotNetFrameworkVersion to be installed. Please upgrade to the newest .NET Framework available." `
-                -ErrorAction Stop
+            -Message "This module/cmdlet requires at least .NET $DotNetFrameworkVersion to be installed. Please upgrade to the newest .NET Framework available." `
+            -ErrorAction Stop
     }
 }
 
@@ -1197,7 +1201,8 @@ class OptionalSecureStringBuilder {
         $this.IsSecureString = $isSecureString
         if ($this.IsSecureString) {
             $this.SecureString = [SecureString]::new()
-        } else {
+        }
+        else {
             $this.StringBuilder = [StringBuilder]::new()
         }
     }
@@ -1205,10 +1210,11 @@ class OptionalSecureStringBuilder {
     # Append a string to the internal object.
     [void]Append([string]$append) {
         if ($this.IsSecureString) {
-            foreach($c in $append) {
+            foreach ($c in $append) {
                 $this.SecureString.AppendChar($c)
             }
-        } else {
+        }
+        else {
             $this.StringBuilder.Append($append) | Out-Null
         }
     }
@@ -1217,7 +1223,8 @@ class OptionalSecureStringBuilder {
     [object]GetInternalObject() {
         if ($this.IsSecureString) {
             return $this.SecureString
-        } else {
+        }
+        else {
             return $this.StringBuilder.ToString()
         }
     }
@@ -1259,22 +1266,22 @@ function Get-RandomString {
 
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [int]$StringLength,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [switch]$AlphanumericOnly,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [switch]$CaseSensitive,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [switch]$IncludeSimilarCharacters,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string[]]$ExcludeCharacters,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [switch]$AsSecureString
     )
 
@@ -1300,7 +1307,7 @@ function Get-RandomString {
     $characters = $characters | Where-Object { $_ -notin $ExcludeCharacters }
 
     $acc = [OptionalSecureStringBuilder]::new($AsSecureString)
-    for($i=0; $i -lt $StringLength; $i++) {
+    for ($i = 0; $i -lt $StringLength; $i++) {
         $random = Get-Random -Minimum 0 -Maximum $characters.Length
         $acc.Append($characters[$random])
     }
@@ -1321,7 +1328,7 @@ function Get-ParentContainer {
 
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true, Position=0)]
+        [Parameter(Mandatory = $true, Position = 0)]
         [string]$DistinguishedName
     )
 
@@ -1330,12 +1337,11 @@ function Get-ParentContainer {
     Process {
 
         $min_idx = 0
-        $attributes = 'DC','CN','OU','O','STREET','L','ST','C',"UID"
+        $attributes = 'DC', 'CN', 'OU', 'O', 'STREET', 'L', 'ST', 'C', "UID"
         $indices = New-Object -TypeName 'System.Collections.ArrayList';
 
 
-        foreach ($attr in $attributes)
-        {  
+        foreach ($attr in $attributes) {  
             $attr = "," + $attr + "="  # Ex: ",DC="
             
             $idx = $DistinguishedName.IndexOf($attr) # Find first occurance
@@ -1347,8 +1353,7 @@ function Get-ParentContainer {
 
         $sortedIndices = $indices | Sort-Object
 
-        if ($indices.Count -ne 0)
-        {
+        if ($indices.Count -ne 0) {
             $min_idx = $sortedIndices[0] + 1
         }
 
@@ -1362,18 +1367,18 @@ function Get-ADDomainInternal {
     [CmdletBinding()]
     
     param(
-        [Parameter(Mandatory=$false, ValueFromPipeline=$true, Position=0)]
+        [Parameter(Mandatory = $false, ValueFromPipeline = $true, Position = 0)]
         [string]$Identity,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]$Credential,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]$Server
     )
 
     process {
-        switch((Get-OSPlatform)) {
+        switch ((Get-OSPlatform)) {
             "Windows" {
                 $parameters = @{}
 
@@ -1411,16 +1416,16 @@ function Get-ADComputerInternal {
     [CmdletBinding()]
     
     param(
-        [Parameter(Mandatory=$true, ParameterSetName="FilterParameterSet")]
+        [Parameter(Mandatory = $true, ParameterSetName = "FilterParameterSet")]
         [string]$Filter,
 
-        [Parameter(Mandatory=$true, ParameterSetName="IdentityParameterSet")]
+        [Parameter(Mandatory = $true, ParameterSetName = "IdentityParameterSet")]
         [string]$Identity,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string[]]$Properties,
         
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]$Server
     )
 
@@ -1474,24 +1479,25 @@ function Rename-ADObjectWithConfirmation {
     [CmdletBinding()]
     
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [object]$ADObject,
 
-        [Parameter(Mandatory=$true)]
-        [string]$NewName
+        [Parameter(Mandatory = $true)]
+        [string]$NewName,
+
+        [Parameter(Mandatory = $true)]
+        [pscredential]$ADCredentials
     )
 
     $existingADObjectName = $ADObject.Name
-    if ($NewName -ne $existingADObjectName)
-    {
+    if ($NewName -ne $existingADObjectName) {
         Write-Host "Existing AD Object Name: $existingADObjectName ; New AD Object Name: $NewName"
-        $message = "`nWould you like to replace the AD Object Name with $NewName instead?"
-        $options = [System.Management.Automation.Host.ChoiceDescription[]]("&Yes", "&No")
-        $result = $host.ui.PromptForChoice($title, $message, $options, 0)
-        if ($result -eq 0)
-        {
-            Rename-ADObject -Identity $ADObject -NewName $NewName
-        }
+        # $message = "`nWould you like to replace the AD Object Name with $NewName instead?"
+        # $options = [System.Management.Automation.Host.ChoiceDescription[]]("&Yes", "&No")
+        # $result = $host.ui.PromptForChoice($title, $message, $options, 0)
+        #if ($result -eq 0) {
+            Rename-ADObject -Identity $ADObject -NewName $NewName -Credential $ADCredentials
+        #}
     }
 
 }
@@ -1501,19 +1507,19 @@ function ConvertTo-EncodedJson {
     [CmdletBinding()]
     
     param(
-        [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
         [object]$Object,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [int]$Depth = 2
     )
 
     $Object = ($Object | ConvertTo-Json -Compress -Depth $Depth).
-        Replace("`"", "*").
-        Replace("[", "<").
-        Replace("]", ">").
-        Replace("{", "^").
-        Replace("}", "%")
+    Replace("`"", "*").
+    Replace("[", "<").
+    Replace("]", ">").
+    Replace("{", "^").
+    Replace("}", "%")
     
     return $Object
 }
@@ -1526,11 +1532,11 @@ function ConvertFrom-EncodedJson {
     )
 
     $String = $String.
-        Replace("*", "`"").
-        Replace("<", "[").
-        Replace(">", "]").
-        Replace("^", "{").
-        Replace("%", "}")
+    Replace("*", "`"").
+    Replace("<", "[").
+    Replace(">", "]").
+    Replace("^", "{").
+    Replace("%", "}")
     
     return (ConvertFrom-Json -InputObject $String)
 }
@@ -1539,10 +1545,10 @@ function Write-OdjBlob {
     [CmdletBinding()]
     
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]$OdjBlob,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]$Path
     )
 
@@ -1566,49 +1572,49 @@ function Register-OfflineMachine {
     [CmdletBinding()]
     
     param(
-        [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
         [string]$MachineName,
         
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]$Domain,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]$MachineOU,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]$DCName,
         
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [switch]$Reuse,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [switch]$NoSearch,
         
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [switch]$DefaultPassword,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [switch]$RootCACertificates,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]$CertificateTemplate,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string[]]$PolicyNames,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string[]]$PolicyPaths,
         
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]$Netbios,
         
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]$PersistentSite,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]$DynamicSite,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]$PrimaryDNS
     )
 
@@ -1618,10 +1624,12 @@ function Register-OfflineMachine {
         if ([string]::IsNullOrEmpty($Domain)) {
             $Domain = Get-ADDomainInternal | `
                 Select-Object -ExpandProperty DNSRoot
-        } else {
+        }
+        else {
             try {
                 Get-ADDomainInternal -Identity $Domain | Out-Null
-            } catch {
+            }
+            catch {
                 throw [System.ArgumentException]::new(
                     "Provided domain $Domain was not found.", "Domain")
             }
@@ -1631,14 +1639,15 @@ function Register-OfflineMachine {
 
         if (![string]::IsNullOrEmpty($MachineName)) {
             $computer = Get-ADComputerInternal `
-                    -Filter "Name -eq '$MachineName'" `
-                    -Server $Domain
+                -Filter "Name -eq '$MachineName'" `
+                -Server $Domain
 
             if ($null -ne $computer) {
                 throw [System.ArgumentException]::new(
                     "Machine $MachineName already exists.", "MachineName")
             }
-        } else {
+        }
+        else {
             throw [System.ArgumentException]::new(
                 "The machine name property must not be empty.", "MachineName")
         }
@@ -1697,7 +1706,7 @@ function Register-OfflineMachine {
             throw [System.NotImplementedException]::new()
         }
 
-        switch((Get-OSPlatform)) {
+        switch ((Get-OSPlatform)) {
             "Windows" {
                 return Register-OfflineMachineWindows @properties
             }
@@ -1721,49 +1730,49 @@ function Register-OfflineMachineWindows {
     [CmdletBinding()]
     
     param(
-        [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
         [string]$MachineName,
         
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]$Domain,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]$MachineOU,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]$DCName,
         
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [switch]$Reuse,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [switch]$NoSearch,
         
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [switch]$DefaultPassword,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [switch]$RootCACertificates,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]$CertificateTemplate,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string[]]$PolicyNames,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string[]]$PolicyPaths,
         
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]$Netbios,
         
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]$PersistentSite,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]$DynamicSite,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]$PrimaryDNS
     )
 
@@ -1833,15 +1842,16 @@ function Register-OfflineMachineWindows {
 
         if ($djoinResult -like "*Computer provisioning completed successfully*") {
             $blobArray = [System.Text.Encoding]::Unicode.GetBytes((Get-Content -Path $tempFile))
-            $blobArray = $blobArray[0..($blobArray.Length-3)]
+            $blobArray = $blobArray[0..($blobArray.Length - 3)]
 
             Remove-Item -Path $tempFile
 
             return [System.Text.Encoding]::Unicode.GetString($blobArray)
-        } else {
+        }
+        else {
             Write-Error `
-                    -Message "Machine $MachineName provisioning failed. DJoin output: $djoinResult" `
-                    -ErrorAction Stop
+                -Message "Machine $MachineName provisioning failed. DJoin output: $djoinResult" `
+                -ErrorAction Stop
         }
     }
 }
@@ -1850,14 +1860,14 @@ function Join-OfflineMachine {
     [CmdletBinding()]
     
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]$OdjBlob,
 
-        [Parameter(Mandatory=$false, ParameterSetName="WindowsParameterSet")]
+        [Parameter(Mandatory = $false, ParameterSetName = "WindowsParameterSet")]
         [string]$WindowsPath
     )
 
-    switch((Get-OSPlatform)) {
+    switch ((Get-OSPlatform)) {
         "Windows" {
             if ([string]::IsNullOrEmpty($WindowsPath)) {
                 $WindowsPath = $env:windir
@@ -1876,10 +1886,11 @@ function Join-OfflineMachine {
             if ($djoinResult -like "*successfully*") {
                 Write-Information -MessageData "Machine successfully provisioned. A reboot is required for changes to be applied."
                 Remove-Item -Path $tempFile
-            } else {
+            }
+            else {
                 Write-Error `
-                        -Message "Machine failed to provision. DJoin output: $djoinResult" `
-                        -ErrorAction Stop
+                    -Message "Machine failed to provision. DJoin output: $djoinResult" `
+                    -ErrorAction Stop
             }
         }
         
@@ -1901,10 +1912,10 @@ function New-RegistryItem {
     [CmdletBinding()]
     
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]$ParentPath,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]$Name
     )
 
@@ -1926,13 +1937,13 @@ function New-RegistryItemProperty {
     [CmdletBinding()]
 
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]$Path,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]$Name,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]$Value
     )
 
@@ -1943,15 +1954,16 @@ function New-RegistryItemProperty {
     
     if ($null -eq $regItemProperty) {
         New-ItemProperty `
-                -Path $Path `
-                -Name $Name `
-                -Value $Value | `
+            -Path $Path `
+            -Name $Name `
+            -Value $Value | `
             Out-Null
-    } else {
+    }
+    else {
         Set-ItemProperty `
-                -Path $Path `
-                -Name $Name `
-                -Value $Value | `
+            -Path $Path `
+            -Name $Name `
+            -Value $Value | `
             Out-Null
     }
 }
@@ -1961,15 +1973,15 @@ function Resolve-DnsNameInternal {
     
     param(
         [Parameter(
-            Mandatory=$true, 
-            Position=0, 
-            ValueFromPipeline=$true, 
-            ValueFromPipelineByPropertyName=$true)]
+            Mandatory = $true, 
+            Position = 0, 
+            ValueFromPipeline = $true, 
+            ValueFromPipelineByPropertyName = $true)]
         [string]$Name
     )
 
     process {
-        switch((Get-OSPlatform)) {
+        switch ((Get-OSPlatform)) {
             "Windows" {
                 return (Resolve-DnsName -Name $Name)
             }
@@ -1994,8 +2006,8 @@ function Resolve-PathRelative {
 
     param(
         [Parameter(
-            Mandatory=$true, 
-            Position=0)]
+            Mandatory = $true, 
+            Position = 0)]
         [string[]]$PathParts
     )
 
@@ -2020,7 +2032,7 @@ function Get-ModuleFiles {
     [CmdletBinding()]
 
     param(
-        [Parameter(Mandatory = $false, ValueFromPipeline=$true)]
+        [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
         [System.Management.Automation.PSModuleInfo]$ModuleInfo
     )
 
@@ -2032,7 +2044,7 @@ function Get-ModuleFiles {
         }
     
         $manifestPath = Resolve-PathRelative `
-                -PathParts $ModuleInfo.ModuleBase, "$($moduleInfo.Name).psd1"
+            -PathParts $ModuleInfo.ModuleBase, "$($moduleInfo.Name).psd1"
         
         if (!(Test-Path -Path $manifestPath)) {
             throw [System.IO.FileNotFoundException]::new(
@@ -2041,36 +2053,37 @@ function Get-ModuleFiles {
         
         try {
             $manifest = Import-PowerShellDataFile -Path $manifestPath
-        } catch {
+        }
+        catch {
             throw [System.IO.FileNotFoundException]::new(
                 "File matching name of manifest found, but does not contain module manifest.", $manifestPath)
         }
     
         $moduleFiles.Add($manifestPath) | Out-Null
         $moduleFiles.Add((Resolve-PathRelative `
-                -PathParts $ModuleInfo.ModuleBase, $manifest.RootModule)) | `
+                    -PathParts $ModuleInfo.ModuleBase, $manifest.RootModule)) | `
             Out-Null
         
         if ($null -ne $manifest.NestedModules) {
-            foreach($nestedModule in $manifest.NestedModules) {
+            foreach ($nestedModule in $manifest.NestedModules) {
                 $moduleFiles.Add((Resolve-PathRelative `
-                        -PathParts $ModuleInfo.ModuleBase, $nestedModule)) | `
+                            -PathParts $ModuleInfo.ModuleBase, $nestedModule)) | `
                     Out-Null
             }
         }
         
         if ($null -ne $manifest.FormatsToProcess) {
-            foreach($format in $manifest.FormatsToProcess) {
+            foreach ($format in $manifest.FormatsToProcess) {
                 $moduleFiles.Add((Resolve-PathRelative `
-                        -PathParts $ModuleInfo.ModuleBase, $format)) | `
+                            -PathParts $ModuleInfo.ModuleBase, $format)) | `
                     Out-Null
             }
         }
     
         if ($null -ne $manifest.RequiredAssemblies) {
-            foreach($assembly in $manifest.RequiredAssemblies) {
+            foreach ($assembly in $manifest.RequiredAssemblies) {
                 $moduleFiles.Add((Resolve-PathRelative `
-                        -PathParts $ModuleInfo.ModuleBase, $assembly)) | `
+                            -PathParts $ModuleInfo.ModuleBase, $assembly)) | `
                     Out-Null
             }
         }
@@ -2082,7 +2095,7 @@ function Get-ModuleFiles {
 function Copy-RemoteModule {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [System.Management.Automation.Runspaces.PSSession]$Session
     )
 
@@ -2090,34 +2103,34 @@ function Copy-RemoteModule {
     $moduleFiles = Get-ModuleFiles | `
         Get-Item | `
         Select-Object `
-            @{ Name = "Name"; Expression = { $_.Name } }, 
-            @{ Name = "Content"; Expression = { (Get-Content -Path $_.FullName) } }
+    @{ Name = "Name"; Expression = { $_.Name } }, 
+    @{ Name = "Content"; Expression = { (Get-Content -Path $_.FullName) } }
 
     Invoke-Command `
-            -Session $Session  `
-            -ArgumentList $moduleInfo.Name, $moduleInfo.Version.ToString(), $moduleFiles `
-            -ScriptBlock {
-                $moduleName = $args[0]
-                $moduleVersion = $args[1]
-                $moduleFiles = $args[2]
+        -Session $Session  `
+        -ArgumentList $moduleInfo.Name, $moduleInfo.Version.ToString(), $moduleFiles `
+        -ScriptBlock {
+        $moduleName = $args[0]
+        $moduleVersion = $args[1]
+        $moduleFiles = $args[2]
 
-                $psModPath = $env:PSModulePath.Split(";")[0]
-                if (!(Test-Path -Path $psModPath)) {
-                    New-Item -Path $psModPath -ItemType Directory | Out-Null
-                }
+        $psModPath = $env:PSModulePath.Split(";")[0]
+        if (!(Test-Path -Path $psModPath)) {
+            New-Item -Path $psModPath -ItemType Directory | Out-Null
+        }
 
-                $modulePath = [System.IO.Path]::Combine(
-                    $psModPath, $moduleName, $moduleVersion)
-                if (!(Test-Path -Path $modulePath)) {
-                    New-Item -Path $modulePath -ItemType Directory | Out-Null
-                }
+        $modulePath = [System.IO.Path]::Combine(
+            $psModPath, $moduleName, $moduleVersion)
+        if (!(Test-Path -Path $modulePath)) {
+            New-Item -Path $modulePath -ItemType Directory | Out-Null
+        }
 
-                foreach($moduleFile in $moduleFiles) {
-                    $filePath = [System.IO.Path]::Combine($modulePath, $moduleFile.Name)
-                    $fileContent = $moduleFile.Content
-                    Set-Content -Path $filePath -Value $fileContent
-                }
-            }
+        foreach ($moduleFile in $moduleFiles) {
+            $filePath = [System.IO.Path]::Combine($modulePath, $moduleFile.Name)
+            $fileContent = $moduleFile.Content
+            Set-Content -Path $filePath -Value $fileContent
+        }
+    }
 }
 
 $sessionDictionary = [System.Collections.Generic.Dictionary[System.Tuple[string, string], System.Management.Automation.Runspaces.PSSession]]::new()
@@ -2125,21 +2138,21 @@ function Initialize-RemoteSession {
     [CmdletBinding()]
     
     param(
-        [Parameter(Mandatory=$true, ParameterSetName="Copy-Session")]
+        [Parameter(Mandatory = $true, ParameterSetName = "Copy-Session")]
         [System.Management.Automation.Runspaces.PSSession]$Session,
 
-        [Parameter(Mandatory=$true, ParameterSetName="Copy-ComputerName")]
+        [Parameter(Mandatory = $true, ParameterSetName = "Copy-ComputerName")]
         [string]$ComputerName,
 
-        [Parameter(Mandatory=$false, ParameterSetName="Copy-ComputerName")]
+        [Parameter(Mandatory = $false, ParameterSetName = "Copy-ComputerName")]
         [System.Management.Automation.PSCredential]$Credential,
 
-        [Parameter(Mandatory=$true, ParameterSetName="Copy-Session")]
-        [Parameter(Mandatory=$true, ParameterSetName="Copy-ComputerName")]
+        [Parameter(Mandatory = $true, ParameterSetName = "Copy-Session")]
+        [Parameter(Mandatory = $true, ParameterSetName = "Copy-ComputerName")]
         [switch]$InstallViaCopy,
 
-        [Parameter(Mandatory=$false, ParameterSetName="Copy-Session")]
-        [Parameter(Mandatory=$false, ParameterSetName="Copy-ComputerName")]
+        [Parameter(Mandatory = $false, ParameterSetName = "Copy-Session")]
+        [Parameter(Mandatory = $false, ParameterSetName = "Copy-ComputerName")]
         [hashtable]$OverrideModuleConfig = @{}
     )
 
@@ -2147,7 +2160,7 @@ function Initialize-RemoteSession {
     $ScriptCopyBehavior = $paramSplit[0]
     $SessionBehavior = $paramSplit[1]
 
-    switch($SessionBehavior) {
+    switch ($SessionBehavior) {
         "Session" { 
             $ComputerName = $session.ComputerName
             $username = Invoke-Command -Session $Session -ScriptBlock {
@@ -2161,7 +2174,8 @@ function Initialize-RemoteSession {
             if ($PSBoundParameters.ContainsKey("Credential")) {
                 $sessionParameters += @{ "Credential" = $Credential }
                 $username = $Credential.UserName
-            } else {
+            }
+            else {
                 $username = $(whoami).ToLowerInvariant()
             }
 
@@ -2181,12 +2195,13 @@ function Initialize-RemoteSession {
             $sessionDictionary.Remove($existingSession)
 
             Remove-PSSession `
-                    -Session $existingSession `
-                    -WarningAction SilentlyContinue `
-                    -ErrorAction SilentlyContinue
+                -Session $existingSession `
+                -WarningAction SilentlyContinue `
+                -ErrorAction SilentlyContinue
             
             $sessionDictionary.Add($lookupTuple, $Session)
-        } else {
+        }
+        else {
             Remove-PSSession `
                 -Session $Session `
                 -WarningAction SilentlyContinue `
@@ -2194,24 +2209,26 @@ function Initialize-RemoteSession {
 
             $Session = $existingSession
         }
-    } else {
+    }
+    else {
         $sessionDictionary.Add($lookupTuple, $Session)
     }
 
     $moduleInfo = Get-CurrentModule
     $remoteModuleInfo = Get-Module `
-            -PSSession $Session `
-            -Name $moduleInfo.Name `
-            -ListAvailable
+        -PSSession $Session `
+        -Name $moduleInfo.Name `
+        -ListAvailable
     
-    switch($ScriptCopyBehavior) {
+    switch ($ScriptCopyBehavior) {
         "Copy" {
             if ($null -eq $remoteModuleInfo) {
                 Copy-RemoteModule -Session $Session
-            } elseif ($moduleInfo.Version -ne $remoteModuleInfo.Version) {
+            }
+            elseif ($moduleInfo.Version -ne $remoteModuleInfo.Version) {
                 Write-Error `
-                        -Message "There is already a version of this module installed on the destination machine $($Session.ComputerName)" `
-                        -ErrorAction Stop
+                    -Message "There is already a version of this module installed on the destination machine $($Session.ComputerName)" `
+                    -ErrorAction Stop
             }
         }
 
@@ -2222,14 +2239,14 @@ function Initialize-RemoteSession {
     }
 
     Invoke-Command `
-            -Session $Session `
-            -ArgumentList $moduleInfo.Name, $OverrideModuleConfig `
-            -ScriptBlock {
-                $moduleName = $args[0]
-                $OverrideModuleConfig = $args[1]
-                Import-Module -Name $moduleName -ArgumentList $OverrideModuleConfig
-                Invoke-Expression -Command "using module $moduleName"
-            }
+        -Session $Session `
+        -ArgumentList $moduleInfo.Name, $OverrideModuleConfig `
+        -ScriptBlock {
+        $moduleName = $args[0]
+        $OverrideModuleConfig = $args[1]
+        Import-Module -Name $moduleName -ArgumentList $OverrideModuleConfig
+        Invoke-Expression -Command "using module $moduleName"
+    }
 
     return $Session
 }
@@ -2240,18 +2257,16 @@ function Initialize-RemoteSession {
 function Validate-StorageAccount {
     [CmdletBinding()]
     param (
-         [Parameter(Mandatory=$true, Position=0)]
-         [string]$ResourceGroupName,
-         [Parameter(Mandatory=$true, Position=1)]
-         [string]$StorageAccountName
+        [Parameter(Mandatory = $true, Position = 0)]
+        [string]$ResourceGroupName,
+        [Parameter(Mandatory = $true, Position = 1)]
+        [string]$StorageAccountName
     )
 
-    process
-    {
+    process {
         $resourceGroupObject = Get-AzResourceGroup -Name $ResourceGroupName
 
-        if ($null -eq $resourceGroupObject)
-        {
+        if ($null -eq $resourceGroupObject) {
             $message = "Resource group not found: '$ResourceGroupName'." `
                 + " Please check whether the provided name '$ResourceGroupName' is valid or" `
                 + " whether the resource group exists by running" `
@@ -2262,8 +2277,7 @@ function Validate-StorageAccount {
 
         $storageAccountObject = Get-AzStorageAccount -ResourceGroup $ResourceGroupName -Name $StorageAccountName
 
-        if ($null -eq $storageAccountObject)
-        {
+        if ($null -eq $storageAccountObject) {
             $message = "Storage account not found: '$StorageAccountName'." `
                 + " Please check whether the provided name '$StorageAccountName' is valid or" `
                 + " whether the storage account exists by running" `
@@ -2297,10 +2311,10 @@ function Ensure-KerbKeyExists {
 
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$True, Position=0, HelpMessage="Resource group name")]
+        [Parameter(Mandatory = $True, Position = 0, HelpMessage = "Resource group name")]
         [string]$ResourceGroupName,
 
-        [Parameter(Mandatory=$True, Position=1, HelpMessage="Storage account name")]
+        [Parameter(Mandatory = $True, Position = 1, HelpMessage = "Storage account name")]
         [string]$StorageAccountName
     )
 
@@ -2336,10 +2350,11 @@ function Ensure-KerbKeyExists {
             }
 
             $kerb1Key = Get-AzStorageAccountKerbKeys -ResourceGroupName $ResourceGroupName -StorageAccountName $StorageAccountName `
-                        | Where-Object { $_.KeyName -eq "kerb1" }
+            | Where-Object { $_.KeyName -eq "kerb1" }
         
             Write-Verbose "    Key: $($kerb1Key.KeyName) generated for StorageAccount: $StorageAccountName"
-        } else {
+        }
+        else {
             Write-Verbose "    Key: $($kerb1Key.KeyName) exists in Storage Account: $StorageAccountName"
         }
 
@@ -2351,10 +2366,11 @@ function Ensure-KerbKeyExists {
             $keys = New-AzStorageAccountKey -ResourceGroupName $ResourceGroupName -Name $StorageAccountName -KeyName kerb2 -ErrorAction Stop
 
             $kerb2Key = Get-AzStorageAccountKerbKeys -ResourceGroupName $ResourceGroupName -StorageAccountName $StorageAccountName `
-                        | Where-Object { $_.KeyName -eq "kerb2" }
+            | Where-Object { $_.KeyName -eq "kerb2" }
         
             Write-Verbose "    Key: $($kerb2Key.KeyName) generated for StorageAccount: $StorageAccountName"
-        } else {
+        }
+        else {
             Write-Verbose "    Key: $($kerb2Key.KeyName) exists in Storage Account: $StorageAccountName"
         }
     }
@@ -2376,10 +2392,10 @@ function Get-AzStorageAccountFileEndpoint {
 
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory=$True, Position=0, HelpMessage="Storage account name")]
+        [Parameter(Mandatory = $True, Position = 0, HelpMessage = "Storage account name")]
         [string]$StorageAccountName,
 
-        [Parameter(Mandatory=$True, Position=1, HelpMessage="Resource group name")]
+        [Parameter(Mandatory = $True, Position = 1, HelpMessage = "Resource group name")]
         [string]$ResourceGroupName
     )
 
@@ -2411,17 +2427,17 @@ function Get-AzStorageAccountActiveDirectoryProperties {
 
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory=$true, Position=0, ParameterSetName="StorageAccountName")]
+        [Parameter(Mandatory = $true, Position = 0, ParameterSetName = "StorageAccountName")]
         [string]$ResourceGroupName,
 
-        [Parameter(Mandatory=$true, Position=1, ParameterSetName="StorageAccountName")]
+        [Parameter(Mandatory = $true, Position = 1, ParameterSetName = "StorageAccountName")]
         [string]$StorageAccountName,
 
         [Parameter(
-            Mandatory=$true, 
-            Position=0, 
-            ParameterSetName="StorageAccount", 
-            ValueFromPipeline=$true)]
+            Mandatory = $true, 
+            Position = 0, 
+            ParameterSetName = "StorageAccount", 
+            ValueFromPipeline = $true)]
         [Microsoft.Azure.Commands.Management.Storage.Models.PSStorageAccount]$StorageAccount
     )
 
@@ -2466,16 +2482,16 @@ function Get-AzStorageAccountKerbKeys {
 
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory=$true, Position=0)]
+        [Parameter(Mandatory = $true, Position = 0)]
         [string]$ResourceGroupName,
-        [Parameter(Mandatory=$true, Position=1)]
+        [Parameter(Mandatory = $true, Position = 1)]
         [string]$StorageAccountName
     )
 
     Validate-StorageAccount -ResourceGroupName $ResourceGroupName -StorageAccountName $StorageAccountName -ErrorAction Stop
     
     $keys = Get-AzStorageAccountKey -ResourceGroupName $ResourceGroupName -Name $StorageAccountName -ListKerbKey `
-            | Where-Object { $_.KeyName -like "kerb*" }
+    | Where-Object { $_.KeyName -like "kerb*" }
 
     if (($null -eq $keys) -or (($keys -is [System.Array]) -and ($keys.Length -eq 0))) {
         $message = "Cannot find kerb keys for storage account '$StorageAccountName' in" `
@@ -2505,17 +2521,17 @@ function Get-ServicePrincipalName {
 
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory=$True, Position=0, HelpMessage="Storage account name")]
+        [Parameter(Mandatory = $True, Position = 0, HelpMessage = "Storage account name")]
         [string]$StorageAccountName,
 
-        [Parameter(Mandatory=$True, Position=1, HelpMessage="Resource group name")]
+        [Parameter(Mandatory = $True, Position = 1, HelpMessage = "Resource group name")]
         [string]$ResourceGroupName
     )
 
     $fileEndpoint = Get-AzStorageAccountFileEndpoint -ResourceGroupName $ResourceGroupName `
         -StorageAccountName $StorageAccountName -ErrorAction Stop
 
-    $servicePrincipalName = $fileEndpoint -replace 'https://','cifs/'
+    $servicePrincipalName = $fileEndpoint -replace 'https://', 'cifs/'
     $servicePrincipalName = $servicePrincipalName.TrimEnd('/')
 
     if ([string]::IsNullOrEmpty($servicePrincipalName)) {
@@ -2545,35 +2561,38 @@ function New-ADAccountForStorageAccount {
 
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory=$true, Position=0)]
+        [Parameter(Mandatory = $true, Position = 0)]
         [string]$ADObjectName,
 
-        [Parameter(Mandatory=$true, Position=1, HelpMessage="Storage account name")]
+        [Parameter(Mandatory = $true, Position = 1, HelpMessage = "Storage account name")]
         [string]$StorageAccountName, 
 
-        [Parameter(Mandatory=$true, Position=2, HelpMessage="Resource group name")]
+        [Parameter(Mandatory = $true, Position = 2, HelpMessage = "Resource group name")]
         [string]$ResourceGroupName,
 
-        [Parameter(Mandatory=$false, Position=3)]
+        [Parameter(Mandatory = $false, Position = 3)]
         [string]$Domain,
 
-        [Parameter(Mandatory=$false, Position=4)]
+        [Parameter(Mandatory = $false, Position = 4)]
         # [Parameter(Mandatory=$false, Position=4, ParameterSetName="OUQuickName")]
         [string]$OrganizationalUnit,
 
-        [Parameter(Mandatory=$false, Position=4)]
+        [Parameter(Mandatory = $false, Position = 4)]
         # [Parameter(Mandatory=$false, Position=4, ParameterSetName="OUDistinguishedName")]
         [string]$OrganizationalUnitDistinguishedName,
 
-        [Parameter(Mandatory=$false, Position=5)]
+        [Parameter(Mandatory = $false, Position = 5)]
         [ValidateSet("ServiceLogonAccount", "ComputerAccount")]
         [string]$ObjectType = "ComputerAccount",
 
-        [Parameter(Mandatory=$false, Position=6)]
+        [Parameter(Mandatory = $false, Position = 6)]
         [switch]$OverwriteExistingADObject,
 
-        [Parameter(Mandatory=$false, Position=7)]
-        [string]$SamAccountName
+        [Parameter(Mandatory = $false, Position = 7)]
+        [string]$SamAccountName,
+
+        [Parameter(Mandatory = $true)]
+        [pscredential]$ADCredentials
     )
 
     Assert-IsWindows
@@ -2585,13 +2604,16 @@ function New-ADAccountForStorageAccount {
     if ([System.String]::IsNullOrEmpty($Domain)) {
         if ($ObjectType -ieq "ComputerAccount") {
             $domainInfo = Get-ADDomain -Current LocalComputer
-        } else { # "ServiceLogonAccount"
+        }
+        else {
+            # "ServiceLogonAccount"
             $domainInfo = Get-ADDomain -Current LoggedOnUser
         }
 
         $Domain = $domainInfo.DnsRoot
         $path = $domainInfo.DistinguishedName
-    } else {
+    }
+    else {
         try {
             $path = ((Get-ADDomain -Server $Domain).DistinguishedName)
         }
@@ -2612,7 +2634,9 @@ function New-ADAccountForStorageAccount {
             }
 
             $OrganizationalUnitDistinguishedName = Get-ParentContainer -DistinguishedName $currentComputer.DistinguishedName
-        } else { # "ServiceLogonAccount"
+        }
+        else {
+            # "ServiceLogonAccount"
             $currentUser = Get-ADUser -Identity $($Env:USERNAME) -Server $Domain
 
             if ($null -eq $currentUser) {
@@ -2629,7 +2653,8 @@ function New-ADAccountForStorageAccount {
         if ($null -eq $ou) {
             Write-Error -Message "Could not find an object with name '$OrganizationalUnitDistinguishedName' in the $Domain domain" -ErrorAction Stop
         }
-    } elseif (-not [System.String]::IsNullOrEmpty($OrganizationalUnit)) {
+    }
+    elseif (-not [System.String]::IsNullOrEmpty($OrganizationalUnit)) {
         $ou = Get-ADObject -Filter "Name -eq '$OrganizationalUnit'" -Server $Domain
 
         if ($null -eq $ou) {
@@ -2644,7 +2669,8 @@ function New-ADAccountForStorageAccount {
             $message.AppendLine("To disambiguate the OU you want to join the storage account to, use the OrganizationalUnitDistinguishedName parameter.")
             Write-Error -Message $message.ToString() -ErrorAction Stop
         }
-    } else {
+    }
+    else {
         Write-Error -Message "Missing parameter OrganizationalUnit or OrganizationalUnitDistinguishedName" -ErrorAction Stop
     }
     
@@ -2665,18 +2691,18 @@ function New-ADAccountForStorageAccount {
 
     # Get SPN
     $spnValue = Get-ServicePrincipalName `
-            -StorageAccountName $StorageAccountName `
-            -ResourceGroupName $ResourceGroupName `
-            -ErrorAction Stop
+        -StorageAccountName $StorageAccountName `
+        -ResourceGroupName $ResourceGroupName `
+        -ErrorAction Stop
 
     # Check to see if SPN already exists
     $computerSpnMatch = Get-ADComputer `
-            -Filter "ServicePrincipalNames -eq '$spnValue'" `
-            -Server $Domain
+        -Filter "ServicePrincipalNames -eq '$spnValue'" `
+        -Server $Domain
 
     $userSpnMatch = Get-ADUser `
-            -Filter "ServicePrincipalNames -eq '$spnValue'" `
-            -Server $Domain
+        -Filter "ServicePrincipalNames -eq '$spnValue'" `
+        -Server $Domain
 
     if (($null -ne $computerSpnMatch) -and ($null -ne $userSpnMatch)) {
         $message = [System.Text.StringBuilder]::new()
@@ -2685,7 +2711,8 @@ function New-ADAccountForStorageAccount {
         $message.AppendLine($userSpnMatch.DistinguishedName)
         $message.AppendLine("It is not supported to have more than one AD object for a given Service Principal Name. Please delete the duplicated object that is not needed and retry this cmdlet.")
         Write-Error -Message $message.ToString() -ErrorAction Stop
-    } elseif ($null -ne $computerSpnMatch) {
+    }
+    elseif ($null -ne $computerSpnMatch) {
         if ($ObjectType -ieq "ServiceLogonAccount") {
             Write-Error -Message "It is not supported to create an AD object of type 'ServiceLogonAccount' when there is already an AD object '$($computerSpnMatch.DistinguishedName)' of type 'ComputerAccount'." -ErrorAction Stop
         }
@@ -2696,7 +2723,8 @@ function New-ADAccountForStorageAccount {
 
         $existingADObjectName = $computerSpnMatch.Name
         Write-Verbose -Message "Overwriting an existing AD $ObjectType object $existingADObjectName with a Service Principal Name of $spnValue in domain $Domain."
-    } elseif ($null -ne $userSpnMatch) {
+    }
+    elseif ($null -ne $userSpnMatch) {
         if ($ObjectType -ieq "ComputerAccount") {
             Write-Error -Message "It is not supported to create an AD object of type 'ComputerAccount' when there is already an AD object '$($userSpnMatch.DistinguishedName)' of type 'ServiceLogonAccount'." -ErrorAction Stop
         }
@@ -2717,8 +2745,7 @@ function New-ADAccountForStorageAccount {
 
     $userPrincipalNameForAES256 = "$spnValue@$Domain"
     # Create the identity in Active Directory.    
-    try
-    {
+    try {
         switch ($ObjectType) {
             "ServiceLogonAccount" {
                 Write-Verbose -Message "`$ServiceAccountName is $StorageAccountName"
@@ -2732,8 +2759,8 @@ function New-ADAccountForStorageAccount {
 
                     if ($userPrincipalName -ne $userPrincipalNameForAES256) {
                         Write-Error `
-                                -Message "The format of UserPrincipalName:$userPrincipalName is incorrect. please change it to: $userPrincipalNameForAES256 for AES256" `
-                                -ErrorAction stop
+                            -Message "The format of UserPrincipalName:$userPrincipalName is incorrect. please change it to: $userPrincipalNameForAES256 for AES256" `
+                            -ErrorAction stop
                     }
 
                     $userSpnMatch.AllowReversiblePasswordEncryption = $false
@@ -2744,7 +2771,8 @@ function New-ADAccountForStorageAccount {
                     $userSpnMatch.UserPrincipalName = $userPrincipalNameForAES256
                     Set-ADUser -Instance $userSpnMatch -ErrorAction Stop
                     Rename-ADObjectWithConfirmation -ADObject $userSpnMatch -NewName $ADObjectName
-                } else {
+                }
+                else {
                     New-ADUser `
                         -SamAccountName $SamAccountName `
                         -Path $path `
@@ -2773,13 +2801,14 @@ function New-ADAccountForStorageAccount {
                     $computerSpnMatch.Description = "Computer account object for Azure storage account $StorageAccountName."
                     $computerSpnMatch.Enabled = $true
                     $computerSpnMatch.KerberosEncryptionType = "AES256"
-                    Set-ADComputer -Instance $computerSpnMatch -ErrorAction Stop
-                    Rename-ADObjectWithConfirmation -ADObject $computerSpnMatch -NewName $ADObjectName
-                } else {
+                    Set-ADComputer -Instance $computerSpnMatch -ErrorAction Stop -Credential $ADCredentials
+                    Rename-ADObjectWithConfirmation -ADObject $computerSpnMatch -NewName $ADObjectName -ADCredentials $ADCredentials
+                }
+                else {
                     New-ADComputer `
-                        -SAMAccountName $SamAccountName `
+                        -SAMAccountName $SamAccountName.Substring(0,14) `
                         -Path $path `
-                        -Name $ADObjectName `
+                        -Name $ADObjectName.Substring(0,14) `
                         -AccountPassword $fileServiceAccountPwdSecureString `
                         -AllowReversiblePasswordEncryption $false `
                         -Description "Computer account object for Azure storage account $StorageAccountName." `
@@ -2787,24 +2816,22 @@ function New-ADAccountForStorageAccount {
                         -Server $Domain `
                         -Enabled $true `
                         -KerberosEncryptionType "AES256" `
-                        -ErrorAction Stop
+                        -Credential $ADCredentials `
+                        -verbose
                 }
             }
         }
     }
-    catch
-    {
+    catch {
         #
         # Give better error message when AD exception is thrown for invalid SAMAccountName length.
         #
 
-        if ($_.Exception.GetType().Name -eq "ADException" -and $_.Exception.Message.Contains("required attribute"))
-        {
+        if ($_.Exception.GetType().Name -eq "ADException" -and $_.Exception.Message.Contains("required attribute")) {
             Write-Error -Message "Unable to create AD object.  Please check that you have permission to create an identity of type $ObjectType in Active Directory location path '$path' for the storage account '$StorageAccountName'"
         }
 
-        if ($_.Exception.GetType().Name -eq "UnauthorizedAccessException")
-        {
+        if ($_.Exception.GetType().Name -eq "UnauthorizedAccessException") {
             Write-Error -Message "Access denied: You don't have permission to create an identity of type $ObjectType in Active Directory location path '$path' for the storage account '$StorageAccountName'"
         }
 
@@ -2863,26 +2890,26 @@ function Get-AzStorageAccountADObject {
 
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true, Position=0, ParameterSetName="StorageAccountName")]
+        [Parameter(Mandatory = $true, Position = 0, ParameterSetName = "StorageAccountName")]
         [string]$ResourceGroupName,
 
-        [Parameter(Mandatory=$true, Position=1, ParameterSetName="StorageAccountName")]
+        [Parameter(Mandatory = $true, Position = 1, ParameterSetName = "StorageAccountName")]
         [string]$StorageAccountName,
 
         [Parameter(
-            Mandatory=$true, 
-            Position=0, 
-            ParameterSetName="StorageAccount", 
-            ValueFromPipeline=$true)]
+            Mandatory = $true, 
+            Position = 0, 
+            ParameterSetName = "StorageAccount", 
+            ValueFromPipeline = $true)]
         [Microsoft.Azure.Commands.Management.Storage.Models.PSStorageAccount]$StorageAccount,
 
-        [Parameter(Mandatory=$true, Position=0, ParameterSetName="ADObjectName")]
+        [Parameter(Mandatory = $true, Position = 0, ParameterSetName = "ADObjectName")]
         [string]$ADObjectName,
 
-        [Parameter(Mandatory=$true, Position=1, ParameterSetName="ADObjectName")]
+        [Parameter(Mandatory = $true, Position = 1, ParameterSetName = "ADObjectName")]
         [string]$SPNValue,
 
-        [Parameter(Mandatory=$false, Position=2, ParameterSetName="ADObjectName")]
+        [Parameter(Mandatory = $false, Position = 2, ParameterSetName = "ADObjectName")]
         [string]$Domain
     )
 
@@ -2907,7 +2934,8 @@ function Get-AzStorageAccountADObject {
             if ($PSCmdlet.ParameterSetName -eq "StorageAccountName") {
                 $activeDirectoryProperties = Get-AzStorageAccountActiveDirectoryProperties `
                     -ResourceGroupName $ResourceGroupName -StorageAccountName $StorageAccountName -ErrorAction Stop
-            } else {
+            }
+            else {
                 $activeDirectoryProperties = Get-AzStorageAccountActiveDirectoryProperties `
                     -StorageAccount $StorageAccount -ErrorAction Stop
 
@@ -2929,16 +2957,17 @@ function Get-AzStorageAccountADObject {
                     + " https://docs.microsoft.com/en-us/azure/storage/files/storage-files-identity-auth-active-directory-enable#12-domain-join-your-storage-account"
                 Write-Error -Message $message -ErrorAction Stop
             }    
-        } else {
+        }
+        else {
             Write-Verbose -Message "Looking for an object with name '$ADObjectName' in domain '$Domain'"
 
             $computerSpnMatch = Get-ADComputer `
-                    -Filter "ServicePrincipalNames -eq '$SPNValue'" `
-                    -Server $Domain
+                -Filter "ServicePrincipalNames -eq '$SPNValue'" `
+                -Server $Domain
 
             $userSpnMatch = Get-ADUser `
-                    -Filter "ServicePrincipalNames -eq '$SPNValue'" `
-                    -Server $Domain
+                -Filter "ServicePrincipalNames -eq '$SPNValue'" `
+                -Server $Domain
 
             if (($null -eq $computerSpnMatch) -and ($null -eq $userSpnMatch)) {
                 $message = "Cannot find an object with a '$ADObjectname' in domain '$Domain'." `
@@ -2947,17 +2976,15 @@ function Get-AzStorageAccountADObject {
                     + " https://docs.microsoft.com/en-us/azure/storage/files/storage-files-identity-auth-active-directory-enable#12-domain-join-your-storage-account"
                 Write-Error -Message $message -ErrorAction Stop
             } 
-            elseif ($null -ne $computerSpnMatch) 
-            {
+            elseif ($null -ne $computerSpnMatch) {
                 return $computerSpnMatch
             } 
-            else
-            {
+            else {
                 return $userSpnMatch
             }    
         }
 
-        Write-Verbose -Message ("Found AD object: " + $obj.DistinguishedName + " of class " + $obj.ObjectClass + ".")
+        Write-Verbose -Message "Found AD object:  $($obj.DistinguishedName) of class $($obj.ObjectClass)" -verbose
 
         switch ($obj.ObjectClass) {
             "computer" {
@@ -2992,7 +3019,7 @@ function Get-AzStorageAccountADObject {
 function Get-CmdKeyTarget {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$True, Position=0, HelpMessage="CmdKey target name to search, e.g., account.file.core.windows.net")]
+        [Parameter(Mandatory = $True, Position = 0, HelpMessage = "CmdKey target name to search, e.g., account.file.core.windows.net")]
         [string]$TargetName
     )
 
@@ -3011,8 +3038,7 @@ function Get-CmdKeyTarget {
         $typeFound = $false
         $userFound = $false
 
-        foreach ($line in $output)
-        {
+        foreach ($line in $output) {
             Write-Verbose $line
             $line = $line.Trim()
 
@@ -3022,8 +3048,7 @@ function Get-CmdKeyTarget {
             # User: Azure\account
             #
 
-            if ($line.StartsWith("Target:") -and $line.EndsWith("target=$TargetName"))
-            {
+            if ($line.StartsWith("Target:") -and $line.EndsWith("target=$TargetName")) {
                 Write-Verbose "Found target $line"
                 $propName = "Target"
                 $propValue = $line.Substring($propName.Length + 1).Trim()
@@ -3031,16 +3056,14 @@ function Get-CmdKeyTarget {
                 Add-Member -InputObject $target -MemberType NoteProperty -Name $propName -Value $propValue -ErrorAction Stop
                 $targetFound = $True
             }
-            elseif ($targetFound -and $line.StartsWith("Type:"))
-            {
+            elseif ($targetFound -and $line.StartsWith("Type:")) {
                 Write-Verbose "Found type $line"
                 $propName = "Type"
                 $propValue = $line.Substring($propName.Length + 1).Trim()
                 Add-Member -InputObject $target -MemberType NoteProperty -Name $propName -Value $propValue -ErrorAction Stop
                 $typeFound = $True
             }
-            elseif ($targetFound -and $typeFound -and $line.StartsWith("User:"))
-            {
+            elseif ($targetFound -and $typeFound -and $line.StartsWith("User:")) {
                 Write-Verbose "Found user $line"
                 $propName = "User"
                 $propValue = $line.Substring($propName.Length + 1).Trim()
@@ -3050,12 +3073,10 @@ function Get-CmdKeyTarget {
             }
         }
 
-        if (-not $userFound)
-        {
+        if (-not $userFound) {
             $target = $null
         }
-        else
-        {
+        else {
             Write-Verbose "Found target object"
             Write-Verbose "Target: $($target.Target)"
             Write-Verbose "Type: $($target.Type)"
@@ -3085,10 +3106,10 @@ function Get-AzStorageKerberosTicketStatus {
     [CmdletBinding()]
 
     param (
-        [Parameter(Mandatory=$True, Position=0, HelpMessage="Storage account name")]
+        [Parameter(Mandatory = $True, Position = 0, HelpMessage = "Storage account name")]
         [string]$StorageAccountName,
 
-        [Parameter(Mandatory=$True, Position=1, HelpMessage="Resource group name")]
+        [Parameter(Mandatory = $True, Position = 1, HelpMessage = "Resource group name")]
         [string]$ResourceGroupName
     )
 
@@ -3096,8 +3117,7 @@ function Get-AzStorageKerberosTicketStatus {
         Assert-IsWindows
     }
 
-    process 
-    {
+    process {
         $spnValue = Get-ServicePrincipalName -StorageAccountName $StorageAccountName `
             -ResourceGroupName $ResourceGroupName -ErrorAction Stop
 
@@ -3114,12 +3134,10 @@ function Get-AzStorageKerberosTicketStatus {
         # storage accounts.
         #
 
-        foreach ($line in $TicketsArray)
-        {   
+        foreach ($line in $TicketsArray) {   
             Write-Verbose $line;
 
-            if ($line -match "0xc000018b")
-            {
+            if ($line -match "0xc000018b") {
                 #
                 # STATUS_NO_TRUST_SAM_ACCOUNT
                 # The SAM database on the Windows Server does not have a computer account for this workstation trust relationship.
@@ -3131,8 +3149,7 @@ function Get-AzStorageKerberosTicketStatus {
                     + " https://docs.microsoft.com/en-us/azure/storage/files/storage-files-identity-auth-active-directory-enable#12-domain-join-your-storage-account"
                 Write-Error -Message $message -ErrorAction Stop
             }
-            elseif ($line -match "0x80090342")
-            {
+            elseif ($line -match "0x80090342") {
                 #
                 # SEC_E_KDC_UNKNOWN_ETYPE
                 # The encryption type requested is not supported by the KDC.
@@ -3145,8 +3162,7 @@ function Get-AzStorageKerberosTicketStatus {
                     + " Update-AzStorageAccountAuthForAES256 -ResourceGroupName '$ResourceGroupName' -StorageAccountName '$StorageAccountName'"
                 Write-Error -Message $message -ErrorAction Stop
             }
-            elseif ($line -match "0x80090303")
-            {
+            elseif ($line -match "0x80090303") {
                 #
                 # SEC_E_TARGET_UNKNOWN
                 # klist failed with 0x80090303/-2146893053: The specified target is unknown or unreachable
@@ -3158,22 +3174,19 @@ function Get-AzStorageKerberosTicketStatus {
 
                 $target = Get-CmdKeyTarget -TargetName $targetName
 
-                if ($null -eq $target)
-                {
+                if ($null -eq $target) {
                     $message = "Unable to find the cached credential for '$targetName'." `
                         + " Original klist error 0x80090303 is unexpected."
                     Write-Error -Message $message -ErrorAction Stop
                 }
-                else
-                {
+                else {
                     Write-Verbose "Executing 'cmdkey.exe /delete:$($target.Target)'"
 
                     cmdkey.exe /delete:$($target.Target)
                     
                     $target = Get-CmdKeyTarget -TargetName $targetName
 
-                    if ($null -ne $target)
-                    {
+                    if ($null -ne $target) {
                         $message = "Unable to delete the cached credential for $($target.Target)." `
                             + " Please manually delete it and retry this cmdlet."
                         Write-Error -Message $message -ErrorAction Stop
@@ -3185,19 +3198,18 @@ function Get-AzStorageKerberosTicketStatus {
                         -ResourceGroupName $ResourceGroupName -ErrorAction Stop
                 }
             }
-            elseif ($line -match "^#\d")
-            {
+            elseif ($line -match "^#\d") {
                 $Ticket = New-Object PSObject
                 $Line1 = $Line.Split('>')[1]
 
-                $Client = $Line1 ;	$Client = $Client.Replace('Client:','') ; $Client = $Client.Substring(2)
-                $Server = $TicketsArray[$Counter+1]; $Server = $Server.Replace('Server:','') ;$Server = $Server.substring(2)
-                $KerbTicketEType = $TicketsArray[$Counter+2];$KerbTicketEType = $KerbTicketEType.Replace('KerbTicket Encryption Type:','');$KerbTicketEType = $KerbTicketEType.substring(2)
-                $TickFlags = $TicketsArray[$Counter+3];$TickFlags = $TickFlags.Replace('Ticket Flags','');$TickFlags = $TickFlags.substring(2)
-                $StartTime =  $TicketsArray[$Counter+4];$StartTime = $StartTime.Replace('Start Time:','');$StartTime = $StartTime.substring(2)
-                $EndTime = $TicketsArray[$Counter+5];$EndTime = $EndTime.Replace('End Time:','');$EndTime = $EndTime.substring(4)
-                $RenewTime = $TicketsArray[$Counter+6];$RenewTime = $RenewTime.Replace('Renew Time:','');$RenewTime = $RenewTime.substring(2)
-                $SessionKey = $TicketsArray[$Counter+7];$SessionKey = $SessionKey.Replace('Session Key Type:','');$SessionKey = $SessionKey.substring(2)
+                $Client = $Line1 ;	$Client = $Client.Replace('Client:', '') ; $Client = $Client.Substring(2)
+                $Server = $TicketsArray[$Counter + 1]; $Server = $Server.Replace('Server:', '') ; $Server = $Server.substring(2)
+                $KerbTicketEType = $TicketsArray[$Counter + 2]; $KerbTicketEType = $KerbTicketEType.Replace('KerbTicket Encryption Type:', ''); $KerbTicketEType = $KerbTicketEType.substring(2)
+                $TickFlags = $TicketsArray[$Counter + 3]; $TickFlags = $TickFlags.Replace('Ticket Flags', ''); $TickFlags = $TickFlags.substring(2)
+                $StartTime = $TicketsArray[$Counter + 4]; $StartTime = $StartTime.Replace('Start Time:', ''); $StartTime = $StartTime.substring(2)
+                $EndTime = $TicketsArray[$Counter + 5]; $EndTime = $EndTime.Replace('End Time:', ''); $EndTime = $EndTime.substring(4)
+                $RenewTime = $TicketsArray[$Counter + 6]; $RenewTime = $RenewTime.Replace('Renew Time:', ''); $RenewTime = $RenewTime.substring(2)
+                $SessionKey = $TicketsArray[$Counter + 7]; $SessionKey = $SessionKey.Replace('Session Key Type:', ''); $SessionKey = $SessionKey.substring(2)
 
                 Add-Member -InputObject $Ticket -MemberType NoteProperty -Name "Client" -Value $Client
                 Add-Member -InputObject $Ticket -MemberType NoteProperty -Name "Server" -Value $Server
@@ -3208,20 +3220,17 @@ function Get-AzStorageKerberosTicketStatus {
                 Add-Member -InputObject $Ticket -MemberType NoteProperty -Name "Renew Time" -Value $RenewTime
                 Add-Member -InputObject $Ticket -MemberType NoteProperty -Name "Session Key Type" -Value $SessionKey
                 
-                if ($Server -match $spnValue)
-                {
+                if ($Server -match $spnValue) {
                     #
                     # We found a ticket to an Azure storage account.  Check that it has valid encryption type.
                     #
                     
-                    if (($KerbTicketEType -notmatch "RC4") -and ($KerbTicketEType -notmatch "AES-256"))
-                    {
+                    if (($KerbTicketEType -notmatch "RC4") -and ($KerbTicketEType -notmatch "AES-256")) {
                         $WarningMessage = "Unhealthy - Unsupported KerbTicket Encryption Type $KerbTicketEType"
                         Add-Member -InputObject $Ticket -MemberType NoteProperty -Name "Azure Files Health Status" -Value $WarningMessage
                         $UnhealthyTickets++;
                     }
-                    else
-                    {
+                    else {
                         Add-Member -InputObject $Ticket -MemberType NoteProperty -Name "Azure Files Health Status" -Value "Healthy"
                         $HealthyTickets++;
                     }
@@ -3236,8 +3245,7 @@ function Get-AzStorageKerberosTicketStatus {
 
         Write-Verbose "Azure Files Kerberos Ticket Health Check Summary:"
 
-        if (($HealthyTickets + $UnhealthyTickets) -eq 0)
-        {
+        if (($HealthyTickets + $UnhealthyTickets) -eq 0) {
             Write-Error "$($HealthyTickets + $UnhealthyTickets) Kerberos service tickets to Azure storage accounts were detected.
         Run the following command: 
             
@@ -3246,33 +3254,29 @@ function Get-AzStorageKerberosTicketStatus {
         " -ErrorAction Stop
 
         }
-        else 
-        {
+        else {
             Write-Verbose "$($HealthyTickets + $UnhealthyTickets) Kerberos service tickets to Azure storage accounts were detected."
         }
         
-        if ($UnhealthyTickets -ne 0)
-        {
+        if ($UnhealthyTickets -ne 0) {
             Write-Warning "$UnhealthyTickets unhealthy Kerberos service tickets to Azure storage accounts were detected."
         }
 
         $Counter = 1;
-        foreach ($TicketObj in ,$TicketsObject)
-        {
+        foreach ($TicketObj in , $TicketsObject) {
             Write-Verbose "Ticket #$Counter : $($TicketObj.'Azure Files Health Status')"
 
-            if ($TicketObj.'Azure Files Health Status' -match "Unhealthy")
-            {
+            if ($TicketObj.'Azure Files Health Status' -match "Unhealthy") {
                 Write-Error "Ticket #$Counter hit error
         Server: $($TicketObj.'Server')
         Status: $($TicketObj.'Azure Files Health Status')"
 
             }
 
-            $TicketObj | Format-List | Out-String|% {Write-Verbose $_}
+            $TicketObj | Format-List | Out-String | ForEach-Object { Write-Verbose $_ }
         }
 
-        return ,$TicketsObject;
+        return , $TicketsObject;
     }
 }
 
@@ -3282,7 +3286,7 @@ function Get-AadUserForSid {
     [CmdletBinding()]
 
     param (
-        [Parameter(Mandatory=$True, Position=0, HelpMessage="Sid")]
+        [Parameter(Mandatory = $True, Position = 0, HelpMessage = "Sid")]
         [string]$sid
     )
 
@@ -3290,8 +3294,7 @@ function Get-AadUserForSid {
 
     $aadUser = Get-MgUser -Filter "OnPremisesSecurityIdentifier eq '$sid'"
 
-    if ($null -eq $aadUser)
-    {
+    if ($null -eq $aadUser) {
         Write-Error "No Azure Active Directory user exists with OnPremisesSecurityIdentifier of the currently logged on user's SID ($sid). `
             This means that the AD user object has not synced to the AAD corresponding to the storage account.
             Mounting to Azure Files using Active Directory authentication is not supported for AD users who have not been synced to `
@@ -3302,20 +3305,18 @@ function Get-AadUserForSid {
 }
 
 
-function Test-Port445Connectivity
-{
+function Test-Port445Connectivity {
     [CmdletBinding()]
 
     param (
-        [Parameter(Mandatory=$True, Position=0, HelpMessage="Storage account name")]
+        [Parameter(Mandatory = $True, Position = 0, HelpMessage = "Storage account name")]
         [string]$StorageAccountName,
 
-        [Parameter(Mandatory=$True, Position=1, HelpMessage="Resource group name")]
+        [Parameter(Mandatory = $True, Position = 1, HelpMessage = "Resource group name")]
         [string]$ResourceGroupName
     )
 
-    process
-    {
+    process {
         #
         # Test-NetConnection -ComputerName <storageAccount>.file.core.windows.net -Port 445
         #
@@ -3330,8 +3331,7 @@ function Test-Port445Connectivity
 
         $result = Test-NetConnection -ComputerName $endpoint -Port 445
 
-        if ($result.TcpTestSucceeded -eq $False)
-        {
+        if ($result.TcpTestSucceeded -eq $False) {
             $message = "Unable to reach the storage account file endpoint." `
                 + " To debug connectivity problems, please refer to the troubleshooting tool for Azure" `
                 + " Files mounting errors on Windows, 'AzFileDiagnostics.ps1'" `
@@ -3344,20 +3344,18 @@ function Test-Port445Connectivity
 }
 
 
-function Debug-AzStorageAccountADObject
-{
+function Debug-AzStorageAccountADObject {
     [CmdletBinding()]
 
     param (
-        [Parameter(Mandatory=$True, Position=0, HelpMessage="Storage account name")]
+        [Parameter(Mandatory = $True, Position = 0, HelpMessage = "Storage account name")]
         [string]$StorageAccountName,
 
-        [Parameter(Mandatory=$True, Position=1, HelpMessage="Resource group name")]
+        [Parameter(Mandatory = $True, Position = 1, HelpMessage = "Resource group name")]
         [string]$ResourceGroupName
     )
 
-    process
-    {
+    process {
         #
         # Check if the object exists.
         #
@@ -3382,20 +3380,18 @@ function Debug-AzStorageAccountADObject
     }
 }
 
-function Debug-KerberosTicketEncryption
-{
+function Debug-KerberosTicketEncryption {
     [CmdletBinding()]
 
     param (
-        [Parameter(Mandatory=$True, Position=0, HelpMessage="Storage account name")]
+        [Parameter(Mandatory = $True, Position = 0, HelpMessage = "Storage account name")]
         [string]$StorageAccountName,
 
-        [Parameter(Mandatory=$True, Position=1, HelpMessage="Resource group name")]
+        [Parameter(Mandatory = $True, Position = 1, HelpMessage = "Resource group name")]
         [string]$ResourceGroupName
     )
 
-    process
-    {
+    process {
         $storageAccount = Validate-StorageAccount -ResourceGroupName $ResourceGroupName `
             -StorageAccountName $StorageAccountName -ErrorAction Stop
 
@@ -3407,27 +3403,24 @@ function Debug-KerberosTicketEncryption
         Write-Verbose "Validating the security protocol settings has 'Kerberos' as one of the Smb Authentication Methods"
 
         $authenticationMethods = $protocolSettings.AuthenticationMethods
-        if ($null -eq $authenticationMethods)
-        {
+        if ($null -eq $authenticationMethods) {
             # if null, all types are supported for the storage account
             $authenticationMethods = "NTLMv2", "Kerberos"
         }
         $authenticationMethods = [String]::Join(", ", $authenticationMethods)
 
-        if(!$authenticationMethods.Contains("Kerberos"))
-        {
+        if (!$authenticationMethods.Contains("Kerberos")) {
             Write-Error -Message "The protocol settings on the storage account does not support 'Kerberos' as one of the Smb Authentication Methods" -ErrorAction Stop
         }
 
         Write-Verbose "Validating Kerberos Ticket Encryption setting on the client side is supported"
         
         $kerberosTicketEncryptionClient = $adObject.KerberosEncryptionType
-        if(
+        if (
             $null -eq $kerberosTicketEncryptionClient -or `
-            0 -eq $kerberosTicketEncryptionClient.Count -or `
-            'None' -eq $kerberosTicketEncryptionClient.Value.ToString()
-            )
-        {
+                0 -eq $kerberosTicketEncryptionClient.Count -or `
+                'None' -eq $kerberosTicketEncryptionClient.Value.ToString()
+        ) {
             # Now try to look for the supported kerberos ticket encryption using klist
             Write-Verbose "The corresponding AD object does not have the field 'KerberosEncryptionType' set. Will try to find the settings using klist..."
 
@@ -3441,18 +3434,15 @@ function Debug-KerberosTicketEncryption
             $kerberosTicketEncryptionClient = @()
 
             $lastLine = ""
-            foreach($currLine in $klistResult){
+            foreach ($currLine in $klistResult) {
 
-                if($lastLine.Contains($spnValue))
-                {
-                    if($currLine.Contains("AES-256"))
-                    {
+                if ($lastLine.Contains($spnValue)) {
+                    if ($currLine.Contains("AES-256")) {
                         $kerberosTicketEncryptionClient += "AES256"
                         break
                     }
 
-                    if($currLine.Contains("RC4-HMAC"))
-                    {
+                    if ($currLine.Contains("RC4-HMAC")) {
                         $kerberosTicketEncryptionClient += "RC4HMAC"
                         break
                     }
@@ -3461,61 +3451,53 @@ function Debug-KerberosTicketEncryption
                 $lastLine = $currLine
             }
 
-            if ($kerberosTicketEncryptionClient.Count -eq 0)
-            {
+            if ($kerberosTicketEncryptionClient.Count -eq 0) {
                 Write-Error -Message "No Kerberos Ticket Encryption is supported on the client side" -ErrorAction Stop
             }
         }
 
-        if ($kerberosTicketEncryptionClient.Value)
-        {
+        if ($kerberosTicketEncryptionClient.Value) {
             $kerberosTicketEncryptionClient = $kerberosTicketEncryptionClient.Value.ToString().replace(' ', '') -split ','
         }
 
 
         $kerberosTicketEncryptionServer = $protocolSettings.KerberosTicketEncryption
-        if($null -eq $kerberosTicketEncryptionServer)
-        {
+        if ($null -eq $kerberosTicketEncryptionServer) {
             $kerberosTicketEncryptionServer = "RC4-HMAC", "AES-256" # null(default): all values are accepted on the server
         }
         $kerberosTicketEncryptionServer = [String]::Join(", ", $kerberosTicketEncryptionServer)
-        $kerberosTicketEncryptionServerNoDash = $kerberosTicketEncryptionServer.replace('-','')
+        $kerberosTicketEncryptionServerNoDash = $kerberosTicketEncryptionServer.replace('-', '')
 
         Write-Verbose "Kerberos Ticket Encryption supported on the client side: $kerberosTicketEncryptionClient"
         Write-Verbose "Kerberos Ticket Encryption supported on the server side: $kerberosTicketEncryptionServerNoDash"
         
         $found = $false
-        foreach($type in $kerberosTicketEncryptionClient)
-        {
-            if ($kerberosTicketEncryptionServerNoDash.Contains($type)) 
-            {
+        foreach ($type in $kerberosTicketEncryptionClient) {
+            if ($kerberosTicketEncryptionServerNoDash.Contains($type)) {
                 $found = $true
                 break
             }
         }
 
-        if (!$found) 
-        {
+        if (!$found) {
             Write-Error -Message "The server side and the client side do not have a Kerberos Ticket Encryption type in common." -ErrorAction Stop
         }
 
     }
 }
 
-function Debug-ChannelEncryption
-{
+function Debug-ChannelEncryption {
     [CmdletBinding()]
 
     param (
-        [Parameter(Mandatory=$True, Position=0, HelpMessage="Storage account name")]
+        [Parameter(Mandatory = $True, Position = 0, HelpMessage = "Storage account name")]
         [string]$StorageAccountName,
 
-        [Parameter(Mandatory=$True, Position=1, HelpMessage="Resource group name")]
+        [Parameter(Mandatory = $True, Position = 1, HelpMessage = "Resource group name")]
         [string]$ResourceGroupName
     )
 
-    process
-    {
+    process {
 
         $storageAccount = Validate-StorageAccount -ResourceGroupName $ResourceGroupName -StorageAccountName $StorageAccountName -ErrorAction Stop
 
@@ -3524,8 +3506,7 @@ function Debug-ChannelEncryption
         $channelEncryptionsClient = (Get-SmbServerConfiguration).EncryptionCiphers.replace("_", "-")
 
         $channelEncryptionsServer = $protocolSettings.ChannelEncryption
-        if ($null -eq $channelEncryptionsServer)
-        {
+        if ($null -eq $channelEncryptionsServer) {
             # if null, all types are supported for the storage account
             $channelEncryptionsServer = "AES-128-CCM", "AES-128-GCM", "AES-256-GCM"
         }
@@ -3535,44 +3516,38 @@ function Debug-ChannelEncryption
         Write-Host "Channel Encryption Supported on the Server Side: $channelEncryptionsServerWithComma"
 
         $found = $false
-        foreach($type in $channelEncryptionsServer)
-        {
-            if($channelEncryptionsClient.Contains($type))
-            {
+        foreach ($type in $channelEncryptionsServer) {
+            if ($channelEncryptionsClient.Contains($type)) {
                 $found = $true
                 break    
             }
         }
 
-        if(!$found)
-        {
+        if (!$found) {
             Write-Error -Message "The server side and the client side do not have a Channel Encryption type in common." -ErrorAction Stop
         }
         
     }
 }
 
-function Debug-DomainLineOfSight
-{
+function Debug-DomainLineOfSight {
     [CmdletBinding()]
 
     param (
-        [Parameter(Mandatory=$True, Position=0, HelpMessage="Storage account name")]
+        [Parameter(Mandatory = $True, Position = 0, HelpMessage = "Storage account name")]
         [string]$StorageAccountName,
 
-        [Parameter(Mandatory=$True, Position=1, HelpMessage="Resource group name")]
+        [Parameter(Mandatory = $True, Position = 1, HelpMessage = "Resource group name")]
         [string]$ResourceGroupName
     )
 
-    process
-    {
+    process {
         $storageAccount = Get-AzStorageAccount -ResourceGroupName $ResourceGroupName -Name $StorageAccountName
         $fullyQualifiedDomainName = $storageAccount.AzureFilesIdentityBasedAuth.ActiveDirectoryProperties.DomainName
         Write-Host "Fully Qualified Domain Name: $fullyQualifiedDomainName"
         $checkResult = nltest /dsgetdc:$fullyQualifiedDomainName | Out-String
 
-        if([string]::IsNullOrEmpty($checkResult))
-        {
+        if ([string]::IsNullOrEmpty($checkResult)) {
             Write-Error -Message "There is no line of sight to the domain controller; Hence, you will not be able to get the Kerberos ticket." -ErrorAction Stop
         }
 
@@ -3582,10 +3557,10 @@ function Debug-DomainLineOfSight
 function Get-OnPremAdUser {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory=$False, Position=0, HelpMessage="The user name or SID to look up the user")]
+        [Parameter(Mandatory = $False, Position = 0, HelpMessage = "The user name or SID to look up the user")]
         [string]$Identity,
 
-        [Parameter(Mandatory=$False, Position=1, HelpMessage="The domain name to look up the user")]
+        [Parameter(Mandatory = $False, Position = 1, HelpMessage = "The domain name to look up the user")]
         [string]$Domain
     )
     process {
@@ -3614,10 +3589,10 @@ function Get-OnPremAdUser {
 function Get-OnPremAdUserGroups {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory=$False, Position=0, HelpMessage="The user name or SID to look up the user groups")]
+        [Parameter(Mandatory = $False, Position = 0, HelpMessage = "The user name or SID to look up the user groups")]
         [string]$Identity,
 
-        [Parameter(Mandatory=$False, Position=1, HelpMessage="The domain name to look up the user groups")]
+        [Parameter(Mandatory = $False, Position = 1, HelpMessage = "The domain name to look up the user groups")]
         [string]$Domain
     )
     process {
@@ -3660,9 +3635,7 @@ class CheckResult {
 function Debug-AzStorageAccountAuth {
     <#
     .SYNOPSIS
-    Executes a sequence of checks to identify common problems with Azure Files Authentication issues.
-    This function is applicable for only ADDS authentication, does not work for AADDS and Microsoft 
-    Entra Kerberos.
+    Executes a sequence of checks to identify common problems with Azure Files Authentication issues.  
     
     .DESCRIPTION
     This cmdlet will query the client computer for Kerberos service tickets to Azure storage accounts.
@@ -3677,55 +3650,53 @@ function Debug-AzStorageAccountAuth {
 
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory=$True, Position=0, HelpMessage="Storage account name")]
+        [Parameter(Mandatory = $True, Position = 0, HelpMessage = "Storage account name")]
         [string]$StorageAccountName,
 
-        [Parameter(Mandatory=$True, Position=1, HelpMessage="Resource group name")]
+        [Parameter(Mandatory = $True, Position = 1, HelpMessage = "Resource group name")]
         [string]$ResourceGroupName,
 
-        [Parameter(Mandatory=$False, Position=2, HelpMessage="Filter")]
+        [Parameter(Mandatory = $False, Position = 2, HelpMessage = "Filter")]
         [string]$Filter,
 
-        [Parameter(Mandatory=$False, Position=3, HelpMessage="Optional parameter for filter 'CheckSidHasAadUser' and 'CheckUserFileAccess'. The user name to check.")]
+        [Parameter(Mandatory = $False, Position = 3, HelpMessage = "Optional parameter for filter 'CheckSidHasAadUser' and 'CheckUserFileAccess'. The user name to check.")]
         [string]$UserName,
 
-        [Parameter(Mandatory=$False, Position=4, HelpMessage="Optional parameter for filter 'CheckSidHasAadUser', 'CheckUserFileAccess' and 'CheckAadUserHasSid'. The domain name to look up the user.")]
+        [Parameter(Mandatory = $False, Position = 4, HelpMessage = "Optional parameter for filter 'CheckSidHasAadUser', 'CheckUserFileAccess' and 'CheckAadUserHasSid'. The domain name to look up the user.")]
         [string]$Domain,
 
-        [Parameter(Mandatory=$False, Position=5, HelpMessage="Required parameter for filter 'CheckAadUserHasSid'. The Azure object ID or user principal name to check.")]
+        [Parameter(Mandatory = $False, Position = 5, HelpMessage = "Required parameter for filter 'CheckAadUserHasSid'. The Azure object ID or user principal name to check.")]
         [string]$ObjectId,
 
-        [Parameter(Mandatory=$False, Position=6, HelpMessage="Required parameter for filter 'CheckUserFileAccess'. The SMB file path on the Azure file share mounted locally using storage account key.")]
+        [Parameter(Mandatory = $False, Position = 6, HelpMessage = "Required parameter for filter 'CheckUserFileAccess'. The SMB file path on the Azure file share mounted locally using storage account key.")]
         [string]$FilePath
     )
 
-    process
-    {
+    process {
         $checksExecuted = 0;
         $filterIsPresent = ![string]::IsNullOrEmpty($Filter);
         $checks = @{
-            "CheckPort445Connectivity" = [CheckResult]::new("CheckPort445Connectivity");
-            "CheckDomainJoined" = [CheckResult]::new("CheckDomainJoined");
-            "CheckADObject" = [CheckResult]::new("CheckADObject");
-            "CheckGetKerberosTicket" = [CheckResult]::new("CheckGetKerberosTicket");
-            "CheckKerberosTicketEncryption" = [CheckResult]::new("CheckKerberosTicketEncryption");
-            "CheckChannelEncryption" = [CheckResult]::new("CheckChannelEncryption");
-            "CheckDomainLineOfSight" = [CheckResult]::new("CheckDomainLineOfSight");
-            "CheckADObjectPasswordIsCorrect" = [CheckResult]::new("CheckADObjectPasswordIsCorrect");
-            "CheckSidHasAadUser" = [CheckResult]::new("CheckSidHasAadUser");
-            "CheckAadUserHasSid" = [CheckResult]::new("CheckAadUserHasSid");
+            "CheckPort445Connectivity"        = [CheckResult]::new("CheckPort445Connectivity");
+            "CheckDomainJoined"               = [CheckResult]::new("CheckDomainJoined");
+            "CheckADObject"                   = [CheckResult]::new("CheckADObject");
+            "CheckGetKerberosTicket"          = [CheckResult]::new("CheckGetKerberosTicket");
+            "CheckKerberosTicketEncryption"   = [CheckResult]::new("CheckKerberosTicketEncryption");
+            "CheckChannelEncryption"          = [CheckResult]::new("CheckChannelEncryption");
+            "CheckDomainLineOfSight"          = [CheckResult]::new("CheckDomainLineOfSight");
+            "CheckADObjectPasswordIsCorrect"  = [CheckResult]::new("CheckADObjectPasswordIsCorrect");
+            "CheckSidHasAadUser"              = [CheckResult]::new("CheckSidHasAadUser");
+            "CheckAadUserHasSid"              = [CheckResult]::new("CheckAadUserHasSid");
             "CheckStorageAccountDomainJoined" = [CheckResult]::new("CheckStorageAccountDomainJoined");
-            "CheckUserRbacAssignment" = [CheckResult]::new("CheckUserRbacAssignment");
-            "CheckUserFileAccess" = [CheckResult]::new("CheckUserFileAccess");
-            "CheckDefaultSharePermission" = [CheckResult]::new("CheckDefaultSharePermission");
+            "CheckUserRbacAssignment"         = [CheckResult]::new("CheckUserRbacAssignment");
+            "CheckUserFileAccess"             = [CheckResult]::new("CheckUserFileAccess");
+            "CheckDefaultSharePermission"     = [CheckResult]::new("CheckDefaultSharePermission");
         }
 
         #
         # Port 445 check 
         #
         
-        if (!$filterIsPresent -or $Filter -match "CheckPort445Connectivity")
-        {
+        if (!$filterIsPresent -or $Filter -match "CheckPort445Connectivity") {
             try {
                 $checksExecuted += 1;
                 Write-Verbose "CheckPort445Connectivity - START"
@@ -3735,7 +3706,8 @@ function Debug-AzStorageAccountAuth {
 
                 $checks["CheckPort445Connectivity"].Result = "Passed"
                 Write-Verbose "CheckPort445Connectivity - SUCCESS"
-            } catch {
+            }
+            catch {
                 $checks["CheckPort445Connectivity"].Result = "Failed"
                 $checks["CheckPort445Connectivity"].Issue = $_
                 Write-Error "CheckPort445Connectivity - FAILED"
@@ -3747,14 +3719,12 @@ function Debug-AzStorageAccountAuth {
         # Domain-Joined Check
         #
 
-        if (!$filterIsPresent -or $Filter -match "CheckDomainJoined")
-        {
+        if (!$filterIsPresent -or $Filter -match "CheckDomainJoined") {
             try {
                 $checksExecuted += 1;
                 Write-Verbose "CheckDomainJoined - START"
         
-                if (!(Get-IsDomainJoined))
-                {
+                if (!(Get-IsDomainJoined)) {
                     $message = "Machine is not domain-joined. Mounting to Azure Files through" `
                         + " Active Directory Authentication is only supported when the computer is joined to" `
                         + " an Active Directory domain, which is synced to Azure AD with Azure AD Connect" `
@@ -3764,7 +3734,8 @@ function Debug-AzStorageAccountAuth {
 
                 $checks["CheckDomainJoined"].Result = "Passed"
                 Write-Verbose "CheckDomainJoined - SUCCESS"
-            } catch {
+            }
+            catch {
                 $checks["CheckDomainJoined"].Result = "Failed"
                 $checks["CheckDomainJoined"].Issue = $_
                 Write-Error "CheckDomainJoined - FAILED"
@@ -3772,8 +3743,7 @@ function Debug-AzStorageAccountAuth {
             }
         }
 
-        if (!$filterIsPresent -or $Filter -match "CheckADObject")
-        {
+        if (!$filterIsPresent -or $Filter -match "CheckADObject") {
             try {
                 $checksExecuted += 1;
                 Write-Verbose "CheckADObject - START"
@@ -3783,7 +3753,8 @@ function Debug-AzStorageAccountAuth {
 
                 $checks["CheckADObject"].Result = "Passed"
                 Write-Verbose "CheckADObject - SUCCESS"
-            } catch {
+            }
+            catch {
                 $checks["CheckADObject"].Result = "Failed"
                 $checks["CheckADObject"].Issue = $_
                 Write-Error "CheckADObject - FAILED"
@@ -3791,8 +3762,7 @@ function Debug-AzStorageAccountAuth {
             }
         }
 
-        if (!$filterIsPresent -or $Filter -match "CheckGetKerberosTicket")
-        {
+        if (!$filterIsPresent -or $Filter -match "CheckGetKerberosTicket") {
             try {
                 $checksExecuted += 1;
                 Write-Verbose "CheckGetKerberosTicket - START"
@@ -3802,7 +3772,8 @@ function Debug-AzStorageAccountAuth {
 
                 $checks["CheckGetKerberosTicket"].Result = "Passed"
                 Write-Verbose "CheckGetKerberosTicket - SUCCESS"
-            } catch {
+            }
+            catch {
                 $checks["CheckGetKerberosTicket"].Result = "Failed"
                 $checks["CheckGetKerberosTicket"].Issue = $_
                 Write-Error "CheckGetKerberosTicket - FAILED"
@@ -3810,8 +3781,7 @@ function Debug-AzStorageAccountAuth {
             }
         }
 
-        if (!$filterIsPresent -or $Filter -match "CheckKerberosTicketEncryption")
-        {
+        if (!$filterIsPresent -or $Filter -match "CheckKerberosTicketEncryption") {
             try {
                 $checksExecuted += 1;
                 Write-Verbose "CheckKerberosTicketEncryption - START"
@@ -3821,7 +3791,8 @@ function Debug-AzStorageAccountAuth {
 
                 $checks["CheckKerberosTicketEncryption"].Result = "Passed"
                 Write-Verbose "CheckKerberosTicketEncryption - SUCCESS"
-            } catch {
+            }
+            catch {
                 $checks["CheckKerberosTicketEncryption"].Result = "Failed"
                 $checks["CheckKerberosTicketEncryption"].Issue = $_
                 Write-Error "CheckKerberosTicketEncryption - FAILED"
@@ -3829,8 +3800,7 @@ function Debug-AzStorageAccountAuth {
             }
         }
 
-        if (!$filterIsPresent -or $Filter -match "CheckChannelEncryption")
-        {
+        if (!$filterIsPresent -or $Filter -match "CheckChannelEncryption") {
             try {
                 $checksExecuted += 1;
                 Write-Verbose "CheckChannelEncryption - START"
@@ -3838,26 +3808,24 @@ function Debug-AzStorageAccountAuth {
                 Assert-IsElevatedSession
 
                 $cmdletNeeded = "Get-SmbServerConfiguration"
-                if(!(Get-Command $cmdletNeeded -ErrorAction SilentlyContinue))
-                {
+                if (!(Get-Command $cmdletNeeded -ErrorAction SilentlyContinue)) {
                     Write-Verbose -Message "Your system does not have or support the command needed for the check '$cmdletNeeded'." -ErrorAction Stop
                     $checks["CheckChannelEncryption"].Result = "Skipped"
                 }
 
-                if(!((Get-SmbServerConfiguration).PSobject.Properties.Name -contains "EncryptionCiphers"))
-                {
+                if (!((Get-SmbServerConfiguration).PSobject.Properties.Name -contains "EncryptionCiphers")) {
                     Write-Verbose -Message "Your operating system does not support the property 'EncryptionCiphers' of the cmdlet 'Get-SmbServerConfiguration'. Please refer to 'https://docs.microsoft.com/en-us/powershell/module/smbshare/set-smbserverconfiguration?view=windowsserver2022-ps'"
                     $checks["CheckChannelEncryption"].Result = "Skipped"
                 }
-                else 
-                {
+                else {
                     Debug-ChannelEncryption -StorageAccountName $StorageAccountName `
-                    -ResourceGroupName $ResourceGroupName -ErrorAction Stop
+                        -ResourceGroupName $ResourceGroupName -ErrorAction Stop
 
                     $checks["CheckChannelEncryption"].Result = "Passed"
                     Write-Verbose "CheckChannelEncryption - SUCCESS"
                 }
-            } catch {
+            }
+            catch {
                 $checks["CheckChannelEncryption"].Result = "Failed"
                 $checks["CheckChannelEncryption"].Issue = $_
                 Write-Error "CheckChannelEncryption - FAILED"
@@ -3865,8 +3833,7 @@ function Debug-AzStorageAccountAuth {
             }
         }
 
-        if (!$filterIsPresent -or $Filter -match "CheckDomainLineOfSight")
-        {
+        if (!$filterIsPresent -or $Filter -match "CheckDomainLineOfSight") {
             try {
                 $checksExecuted += 1;
                 Write-Verbose "CheckDomainLineOfSight - START"
@@ -3876,7 +3843,8 @@ function Debug-AzStorageAccountAuth {
 
                 $checks["CheckDomainLineOfSight"].Result = "Passed"
                 Write-Verbose "CheckDomainLineOfSight - SUCCESS"
-            } catch {
+            }
+            catch {
                 $checks["CheckDomainLineOfSight"].Result = "Failed"
                 $checks["CheckDomainLineOfSight"].Issue = $_
                 Write-Error "CheckDomainLineOfSight - FAILED"
@@ -3884,8 +3852,7 @@ function Debug-AzStorageAccountAuth {
             }
         }
 
-        if (!$filterIsPresent -or $Filter -match "CheckADObjectPasswordIsCorrect")
-        {
+        if (!$filterIsPresent -or $Filter -match "CheckADObjectPasswordIsCorrect") {
             try {
                 $checksExecuted += 1;
                 Write-Verbose "CheckADObjectPasswordIsCorrect - START"
@@ -3895,7 +3862,8 @@ function Debug-AzStorageAccountAuth {
 
                 $checks["CheckADObjectPasswordIsCorrect"].Result = "Passed"
                 Write-Verbose "CheckADObjectPasswordIsCorrect - SUCCESS"
-            } catch {
+            }
+            catch {
                 $checks["CheckADObjectPasswordIsCorrect"].Result = "Failed"
                 $checks["CheckADObjectPasswordIsCorrect"].Issue = $_
                 Write-Error "CheckADObjectPasswordIsCorrect - FAILED"
@@ -3903,8 +3871,7 @@ function Debug-AzStorageAccountAuth {
             }
         }
 
-        if (!$filterIsPresent -or $Filter -match "CheckSidHasAadUser")
-        {
+        if (!$filterIsPresent -or $Filter -match "CheckSidHasAadUser") {
             try {
                 $checksExecuted += 1;
                 Write-Verbose "CheckSidHasAadUser - START"
@@ -3927,7 +3894,8 @@ function Debug-AzStorageAccountAuth {
 
                 $checks["CheckSidHasAadUser"].Result = "Passed"
                 Write-Verbose "CheckSidHasAadUser - SUCCESS"
-            } catch {
+            }
+            catch {
                 $checks["CheckSidHasAadUser"].Result = "Failed"
                 $checks["CheckSidHasAadUser"].Issue = $_
                 Write-Error "CheckSidHasAadUser - FAILED"
@@ -3935,8 +3903,7 @@ function Debug-AzStorageAccountAuth {
             }
         }
 
-        if (!$filterIsPresent -or $Filter -match "CheckAadUserHasSid")
-        {
+        if (!$filterIsPresent -or $Filter -match "CheckAadUserHasSid") {
             try {
                 $checksExecuted += 1;
                 Write-Verbose "CheckAadUserHasSid - START"
@@ -3982,7 +3949,8 @@ function Debug-AzStorageAccountAuth {
                     Write-Verbose "CheckAadUserHasSid - SUCCESS"
                 }
 
-            } catch {
+            }
+            catch {
                 $checks["CheckAadUserHasSid"].Result = "Failed"
                 $checks["CheckAadUserHasSid"].Issue = $_
                 Write-Error "CheckAadUserHasSid - FAILED"
@@ -3990,8 +3958,7 @@ function Debug-AzStorageAccountAuth {
             }
         }
 
-        if (!$filterIsPresent -or ($Filter -match "CheckStorageAccountDomainJoined"))
-        {
+        if (!$filterIsPresent -or ($Filter -match "CheckStorageAccountDomainJoined")) {
             try {
                 $checksExecuted += 1
                 Write-Verbose "CheckStorageAccountDomainJoined - START"
@@ -4003,7 +3970,8 @@ function Debug-AzStorageAccountAuth {
                 
                 $checks["CheckStorageAccountDomainJoined"].Result = "Passed"
                 Write-Verbose "CheckStorageAccountDomainJoined - SUCCESS"
-            } catch {
+            }
+            catch {
                 $checks["CheckStorageAccountDomainJoined"].Result = "Failed"
                 $checks["CheckStorageAccountDomainJoined"].Issue = $_
                 Write-Error "CheckStorageAccountDomainJoined - FAILED"
@@ -4034,11 +4002,11 @@ function Debug-AzStorageAccountAuth {
                 $smbRoleNamePrefix = "Storage File Data SMB Share"
                 $smbRoleDefinitions = @{}
                 Get-AzRoleDefinition | Where-Object { $_.Name.StartsWith($smbRoleNamePrefix) } `
-                    | ForEach-Object { $smbRoleDefinitions[$_.Id] = $_ }
+                | ForEach-Object { $smbRoleDefinitions[$_.Id] = $_ }
                 
                 $roleAssignments = Get-AzRoleAssignment -ResourceGroupName $ResourceGroupName `
                     -ResourceName $StorageAccountName -ResourceType Microsoft.Storage/storageAccounts `
-                    | Where-Object { $smbRoleDefinitions.ContainsKey($_.RoleDefinitionId) }
+                | Where-Object { $smbRoleDefinitions.ContainsKey($_.RoleDefinitionId) }
 
                 $roleDefinitions = @{}
                 $assignedAdObjects = @{}
@@ -4056,8 +4024,8 @@ function Debug-AzStorageAccountAuth {
                     }
 
                     if (($null -ne $aadObject) `
-                        -and (-not [string]::IsNullOrEmpty($aadObject.OnPremisesSecurityIdentifier)) `
-                        -and ($sidNames.ContainsKey($aadObject.OnPremisesSecurityIdentifier))) {
+                            -and (-not [string]::IsNullOrEmpty($aadObject.OnPremisesSecurityIdentifier)) `
+                            -and ($sidNames.ContainsKey($aadObject.OnPremisesSecurityIdentifier))) {
                         if (-not $roleDefinitions.ContainsKey($assignment.RoleDefinitionId)) {
                             $roleDefinitions[$assignment.RoleDefinitionId] = $smbRoleDefinitions[$assignment.RoleDefinitionId]
                         }
@@ -4093,7 +4061,8 @@ function Debug-AzStorageAccountAuth {
 
                 $checks["CheckUserRbacAssignment"].Result = "Passed"
                 Write-Verbose "CheckUserRbacAssignment - SUCCESS"
-            } catch {
+            }
+            catch {
                 $checks["CheckUserRbacAssignment"].Result = "Failed"
                 $checks["CheckUserRbacAssignment"].Issue = $_
                 Write-Error "CheckUserRbacAssignment - FAILED"
@@ -4101,8 +4070,7 @@ function Debug-AzStorageAccountAuth {
             }
         }
 
-        if (!$filterIsPresent -or $Filter -match "CheckUserFileAccess")
-        {
+        if (!$filterIsPresent -or $Filter -match "CheckUserFileAccess") {
             try {
                 $checksExecuted += 1;
                 Write-Verbose "CheckUserFileAccess - START"
@@ -4110,7 +4078,8 @@ function Debug-AzStorageAccountAuth {
                 if ([string]::IsNullOrEmpty($FilePath)) {
                     Write-Verbose -Message "Missing required parameter FilePath for CheckUserFileAccess, skipping CheckUserFileAccess"
                     $checks["CheckUserFileAccess"].Result = "Skipped"
-                } else {
+                }
+                else {
                     $fileAcl = Get-Acl -Path $FilePath
                     if ($null -eq $fileAcl) {
                         $message = "Unable to get the ACL of '$FilePath'. Please check if the provided file path is correct."
@@ -4138,7 +4107,8 @@ function Debug-AzStorageAccountAuth {
                             }
 
                             $sidRules[$accessRule.IdentityReference] += $accessRule
-                        } else {
+                        }
+                        else {
                             foreach ($group in $identity.Groups) {
                                 if ($accessRule.IdentityReference -ieq $group.Value) {
                                     if (-not $sidRules.ContainsKey($accessRule.IdentityReference)) {
@@ -4171,7 +4141,8 @@ function Debug-AzStorageAccountAuth {
                     Write-Verbose "CheckUserFileAccess - SUCCESS"
                 }
 
-            } catch {
+            }
+            catch {
                 $checks["CheckUserFileAccess"].Result = "Failed"
                 $checks["CheckUserFileAccess"].Issue = $_
                 Write-Error "CheckUserFileAccess - FAILED"
@@ -4179,8 +4150,7 @@ function Debug-AzStorageAccountAuth {
             }
         }
 
-        if (!$filterIsPresent -or $Filter -match "CheckDefaultSharePermission")
-        {
+        if (!$filterIsPresent -or $Filter -match "CheckDefaultSharePermission") {
             try {
                 $checksExecuted += 1
                 Write-Verbose "CheckDefaultSharePermission - START"
@@ -4193,13 +4163,14 @@ function Debug-AzStorageAccountAuth {
                 $DefaultSharePermission = $StorageAccountObject.AzureFilesIdentityBasedAuth.DefaultSharePermission
                 
                 # If DefaultSharePermission is null or 'None'
-                if((!$DefaultSharePermission) -or ($DefaultSharePermission -eq 'None')){
+                if ((!$DefaultSharePermission) -or ($DefaultSharePermission -eq 'None')) {
                     $DefaultSharePermission = "Not Configured. Please visit https://docs.microsoft.com/en-us/azure/storage/files/storage-files-identity-ad-ds-assign-permissions?tabs=azure-portal for more information if needed."
                 }
                 Write-Verbose "DefaultSharePermission: $DefaultSharePermission"
                 Write-Verbose "CheckDefaultSharePermission - SUCCESS"
                 $checks["CheckDefaultSharePermission"].Result = "Passed"
-            } catch {
+            }
+            catch {
                 $checks["CheckDefaultSharePermission"].Result = "Failed"
                 $checks["CheckDefaultSharePermission"].Issue = $_
                 Write-Error "CheckDefaultSharePermission - FAILED"
@@ -4207,16 +4178,14 @@ function Debug-AzStorageAccountAuth {
             }
         }
 
-        if ($filterIsPresent -and $checksExecuted -eq 0)
-        {
+        if ($filterIsPresent -and $checksExecuted -eq 0) {
             $message = "Filter '$Filter' provided does not match any options. No checks were executed." `
                 + " Available filters are {$($checks.Keys -join ', ')}"
             Write-Error -Message $message -ErrorAction Stop
         }
-        else
-        {
+        else {
             Write-Host "Summary of checks:"
-            $checks.Values | Format-Table -Property Name,Result
+            $checks.Values | Format-Table -Property Name, Result
             
             $issues = $checks.Values | Where-Object { $_.Result -ieq "Failed" }
 
@@ -4227,12 +4196,12 @@ function Debug-AzStorageAccountAuth {
         }
         
         $message = "********************`r`n" `
-                + "If above checks are not helpful and further investigation/debugging is needed from the Azure Files team.`r`n" `
-                + "Please prepare the full console log from the cmdlet and Wireshark traces for any mount or access errors to`r`n" `
-                + "help reproducing the issue and speed up the investigation.`r`n"`
-                + "`r`n"`
-                + "Wireshark: https://www.wireshark.org/ `r`n"`
-                + "********************`r`n" 
+            + "If above checks are not helpful and further investigation/debugging is needed from the Azure Files team.`r`n" `
+            + "Please prepare the full console log from the cmdlet and Wireshark traces for any mount or access errors to`r`n" `
+            + "help reproducing the issue and speed up the investigation.`r`n"`
+            + "`r`n"`
+            + "Wireshark: https://www.wireshark.org/ `r`n"`
+            + "********************`r`n" 
 
         Write-Host $message
 
@@ -4270,22 +4239,22 @@ function Set-StorageAccountDomainProperties {
 
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true, Position=0)]
+        [Parameter(Mandatory = $true, Position = 0)]
         [string]$ResourceGroupName,
 
-        [Parameter(Mandatory=$true, Position=1)]
+        [Parameter(Mandatory = $true, Position = 1)]
         [string]$StorageAccountName,
 
-        [Parameter(Mandatory=$false, Position=2)]
+        [Parameter(Mandatory = $false, Position = 2)]
         [string]$ADObjectName,
 
-        [Parameter(Mandatory=$true, Position=3)]
+        [Parameter(Mandatory = $true, Position = 3)]
         [string]$Domain,
 
-        [Parameter(Mandatory=$false, Position=4)]
+        [Parameter(Mandatory = $false, Position = 4)]
         [switch]$DisableADDS,
 
-        [Parameter(Mandatory=$false, Position=5)]
+        [Parameter(Mandatory = $false, Position = 5)]
         [switch]$Force
     )
 
@@ -4295,7 +4264,8 @@ function Set-StorageAccountDomainProperties {
 
         Set-AzStorageAccount -ResourceGroupName $ResourceGroupName -AccountName $StorageAccountName `
             -EnableActiveDirectoryDomainServicesForFile $false
-    } else {
+    }
+    else {
 
         $storageAccount = Get-AzStorageAccount -ResourceGroupName $ResourceGroupName -AccountName $StorageAccountName
 
@@ -4362,12 +4332,13 @@ function Set-StorageAccountDomainProperties {
             ActiveDirectoryAccountType=$accountType"
 
         Set-AzStorageAccount -ResourceGroupName $ResourceGroupName -AccountName $StorageAccountName `
-             -EnableActiveDirectoryDomainServicesForFile $true -ActiveDirectoryDomainName $domainName `
-             -ActiveDirectoryNetBiosDomainName $netBiosDomainName -ActiveDirectoryForestName $forestName `
-             -ActiveDirectoryDomainGuid $domainGuid -ActiveDirectoryDomainSid $domainSid `
-             -ActiveDirectoryAzureStorageSid $azureStorageSid `
-             -ActiveDirectorySamAccountName $samAccountName `
-             -ActiveDirectoryAccountType $accountType
+            -EnableActiveDirectoryDomainServicesForFile $true -ActiveDirectoryDomainName $domainName `
+            -ActiveDirectoryNetBiosDomainName $netBiosDomainName -ActiveDirectoryForestName $forestName `
+            -ActiveDirectoryDomainGuid $domainGuid -ActiveDirectoryDomainSid $domainSid `
+            -ActiveDirectoryAzureStorageSid $azureStorageSid `
+            -ActiveDirectorySamAccountName $samAccountName `
+            -ActiveDirectoryAccountType $accountType `
+            -Verbose
     }
 
     Write-Verbose "Set-StorageAccountDomainProperties: Complete"
@@ -4424,18 +4395,18 @@ function Test-AzStorageAccountADObjectPasswordIsKerbKey {
 
     [CmdletBinding()]
     param(
-         [Parameter(Mandatory=$true, Position=0, ParameterSetName="StorageAccountName")]
-         [string]$ResourceGroupName,
+        [Parameter(Mandatory = $true, Position = 0, ParameterSetName = "StorageAccountName")]
+        [string]$ResourceGroupName,
 
-         [Parameter(Mandatory=$true, Position=1, ParameterSetName="StorageAccountName")]
-         [Alias('Name')]
-         [string]$StorageAccountName,
+        [Parameter(Mandatory = $true, Position = 1, ParameterSetName = "StorageAccountName")]
+        [Alias('Name')]
+        [string]$StorageAccountName,
 
-         [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ParameterSetName="StorageAccount")]
-         [Microsoft.Azure.Commands.Management.Storage.Models.PSStorageAccount]$StorageAccount,
+        [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true, ParameterSetName = "StorageAccount")]
+        [Microsoft.Azure.Commands.Management.Storage.Models.PSStorageAccount]$StorageAccount,
 
-         [Parameter(Mandatory=$false)]
-         [switch]$ErrorIfNoMatch = $false
+        [Parameter(Mandatory = $false)]
+        [switch]$ErrorIfNoMatch = $false
     )
 
     begin {
@@ -4444,8 +4415,7 @@ function Test-AzStorageAccountADObjectPasswordIsKerbKey {
         Request-ADFeature
     }
 
-    process
-    {
+    process {
         switch ($PSCmdlet.ParameterSetName) {
             "StorageAccountName" {
                 $StorageAccount = Validate-StorageAccount -ResourceGroupName $ResourceGroupName `
@@ -4489,7 +4459,8 @@ function Test-AzStorageAccountADObjectPasswordIsKerbKey {
                     $StorageAccountName, 
                     $key.KeyName, 
                     $true)
-            } else {
+            }
+            else {
                 $keyMatches += [KerbKeyMatch]::new(
                     $ResourceGroupName, 
                     $StorageAccountName, 
@@ -4507,7 +4478,8 @@ function Test-AzStorageAccountADObjectPasswordIsKerbKey {
             
             if ($ErrorIfNoMatch) {
                 Write-Error -Message $message -ErrorAction Stop
-            } else {
+            }
+            else {
                 Write-Warning -Message $message
             }
         }
@@ -4545,7 +4517,7 @@ function Update-AzStorageAccountADObjectPassword {
     fail if the storage account has not been domain joined. If you specify ResourceGroupName and 
     StorageAccountName, you do not need to specify StorageAccount.
     .Example
-    PS> Update-AzStorageAccountADObjectPassword -RotateToKerbKey kerb2 -ResourceGroupName "myResourceGroup" -StorageAccountName "myStorageAccount"
+    PS> Update-AzStorageAccountADObjectPassword -RotateToKerbKey kerb2 -ResourceGroupName "myResourceGroup" -StorageAccountName "myStorageAccount" -ADCredentials $ADCredentials
     
     .Example 
     PS> $storageAccount = Get-AzStorageAccount -ResourceGroupName "myResourceGroup" -Name "myStorageAccount"
@@ -4559,27 +4531,30 @@ function Update-AzStorageAccountADObjectPassword {
     in the resource group myResourceGroup to Update-AzStorageAccountADObjectPassword.
     #>
 
-    [CmdletBinding(SupportsShouldProcess, ConfirmImpact="High")]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = "High")]
     param(
-        [Parameter(Mandatory=$true, Position=0)]
+        [Parameter(Mandatory = $true, Position = 0)]
         [ValidateSet("kerb1", "kerb2")]
         [string]$RotateToKerbKey,
 
-        [Parameter(Mandatory=$true, Position=1, ParameterSetName="StorageAccountName")]
+        [Parameter(Mandatory = $true, Position = 1, ParameterSetName = "StorageAccountName")]
         [string]$ResourceGroupName,
 
-        [Parameter(Mandatory=$true, Position=2, ParameterSetName="StorageAccountName")]
+        [Parameter(Mandatory = $true, Position = 2, ParameterSetName = "StorageAccountName")]
         [string]$StorageAccountName,
 
         [Parameter(
-            Mandatory=$true, 
-            Position=1, 
-            ValueFromPipeline=$true, 
-            ParameterSetName="StorageAccount")]
+            Mandatory = $true, 
+            Position = 1, 
+            ValueFromPipeline = $true, 
+            ParameterSetName = "StorageAccount")]
         [Microsoft.Azure.Commands.Management.Storage.Models.PSStorageAccount]$StorageAccount,
 
-        [Parameter(Mandatory=$false)]
-        [switch]$SkipKeyRegeneration
+        [Parameter(Mandatory = $false)]
+        [switch]$SkipKeyRegeneration,
+
+        [Parameter(Mandatory = $true)]
+        [PSCredential]$ADCredentials
 
         #[Parameter(Mandatory=$false)]
         #[switch]$Force
@@ -4623,67 +4598,71 @@ function Update-AzStorageAccountADObjectPassword {
 
         Assert-IsSupportedDistinguishedName -DistinguishedName $adObj.DistinguishedName
         
-        $caption = ("Set password on AD object " + $adObj.SamAccountName + `
-            " for " + $StorageAccount.StorageAccountName + " to value of $RotateToKerbKey.")
-        $verboseConfirmMessage = ("This action will change the password for the indicated AD object " + `
-            "from $otherKerbKeyName to $RotateToKerbKey. This is intended to be a two-stage " + `
-            "process: rotate from kerb1 to kerb2 (kerb2 will be regenerated on the storage " + `
-            "account before being set), wait several hours, and then rotate back to kerb1 " + `
-            "(this cmdlet will likewise regenerate kerb1).")
+        write-verbose -message "Set password on AD object $($adObj.SamAccountName) for $($StorageAccount.StorageAccountName) to value of $RotateToKerbKey." -verbose
+        # $caption = ("Set password on AD object " + $adObj.SamAccountName + `
+        #         " for " + $StorageAccount.StorageAccountName + " to value of $RotateToKerbKey.")
+        # $verboseConfirmMessage = ("This action will change the password for the indicated AD object " + `
+        #         "from $otherKerbKeyName to $RotateToKerbKey. This is intended to be a two-stage " + `
+        #         "process: rotate from kerb1 to kerb2 (kerb2 will be regenerated on the storage " + `
+        #         "account before being set), wait several hours, and then rotate back to kerb1 " + `
+        #         "(this cmdlet will likewise regenerate kerb1).")
 
-        if ($PSCmdlet.ShouldProcess($verboseConfirmMessage, $verboseConfirmMessage, $caption)) {
-            Write-Verbose -Message "Desire to rotate password confirmed."
-            
-            Write-Verbose -Message ("Regenerate $RotateToKerbKey on " + $StorageAccount.StorageAccountName)
-            if (!$SkipKeyRegeneration.ToBool()) {
-                $kerbKeys = New-AzStorageAccountKey `
-                    -ResourceGroupName $StorageAccount.ResourceGroupName `
-                    -Name $StorageAccount.StorageAccountName `
-                    -KeyName $RotateToKerbKey `
-                    -ErrorAction Stop | `
-                Select-Object -ExpandProperty Keys
-            } else {
-                $kerbKeys = Get-AzStorageAccountKerbKeys `
-                    -ResourceGroupName $StorageAccount.ResourceGroupName `
-                    -StorageAccountName $StorageAccount.StorageAccountName `
-                    -ErrorAction Stop
-            }             
+        #if ($PSCmdlet.ShouldProcess($verboseConfirmMessage, $verboseConfirmMessage, $caption)) {
+        Write-Verbose -Message "Desire to rotate password confirmed."
         
-            $kerbKey = $kerbKeys | `
-                Where-Object { $_.KeyName -eq $RotateToKerbKey } | `
-                Select-Object -ExpandProperty Value  
+        Write-Verbose -Message ("Regenerate $RotateToKerbKey on " + $StorageAccount.StorageAccountName)
+        if (!$SkipKeyRegeneration.ToBool()) {
+            $kerbKeys = New-AzStorageAccountKey `
+                -ResourceGroupName $StorageAccount.ResourceGroupName `
+                -Name $StorageAccount.StorageAccountName `
+                -KeyName $RotateToKerbKey `
+                -ErrorAction Stop `
+                -verbose | `
+                Select-Object -ExpandProperty Keys
+        }
+        else {
+            $kerbKeys = Get-AzStorageAccountKerbKeys `
+                -ResourceGroupName $StorageAccount.ResourceGroupName `
+                -StorageAccountName $StorageAccount.StorageAccountName `
+                -ErrorAction Stop
+        }             
     
-            # $otherKerbKey = $kerbKeys | `
-            #     Where-Object { $_.KeyName -eq $otherKerbKeyName } | `
-            #     Select-Object -ExpandProperty Value
-    
-            # $oldPassword = ConvertTo-SecureString -String $otherKerbKey -AsPlainText -Force
-            $newPassword = ConvertTo-SecureString -String $kerbKey -AsPlainText -Force
-    
-            # if ($Force.ToBool()) {
-                Write-Verbose -Message ("Attempt reset on " + $adObj.SamAccountName + " to $RotateToKerbKey")
-                Set-ADAccountPassword `
-                    -Identity $adObj `
-                    -Reset `
-                    -NewPassword $newPassword `
-                    -Server $domain `
-                    -ErrorAction Stop
-            # } else {
-            #     Write-Verbose `
-            #         -Message ("Change password on " + $adObj.SamAccountName + " from $otherKerbKeyName to $RotateToKerbKey.")
-            #     Set-ADAccountPassword `
-            #         -Identity $adObj `
-            #         -OldPassword $oldPassword `
-            #         -NewPassword $newPassword `
-            #         -ErrorAction Stop
-            # }
+        $kerbKey = $kerbKeys | `
+            Where-Object { $_.KeyName -eq $RotateToKerbKey } | `
+            Select-Object -ExpandProperty Value  
 
-            Write-Verbose -Message "Password changed successfully."
-        } else {
-            Write-Verbose -Message ("Password for " + $adObj.SamAccountName + " for storage account " + `
-                $StorageAccount.StorageAccountName + " not changed.")
-        }        
+        # $otherKerbKey = $kerbKeys | `
+        #     Where-Object { $_.KeyName -eq $otherKerbKeyName } | `
+        #     Select-Object -ExpandProperty Value
+
+        # $oldPassword = ConvertTo-SecureString -String $otherKerbKey -AsPlainText -Force
+        $newPassword = ConvertTo-SecureString -String $kerbKey -AsPlainText -Force
+
+        # if ($Force.ToBool()) {
+        Write-Verbose -Message ("Attempt reset on " + $adObj.SamAccountName + " to $RotateToKerbKey")
+        Set-ADAccountPassword `
+            -Identity $adObj `
+            -Reset `
+            -Credential $ADCredentials `
+            -NewPassword $newPassword `
+            -Server $domain `
+            -ErrorAction Stop
+        # } else {
+        #     Write-Verbose `
+        #         -Message ("Change password on " + $adObj.SamAccountName + " from $otherKerbKeyName to $RotateToKerbKey.")
+        #     Set-ADAccountPassword `
+        #         -Identity $adObj `
+        #         -OldPassword $oldPassword `
+        #         -NewPassword $newPassword `
+        #         -ErrorAction Stop
+        # }
+
+        Write-Verbose -Message "Password changed successfully."
     }
+        #else {
+        #    Write-Verbose -Message ("Password for " + $adObj.SamAccountName + " for storage account " + `
+        #            $StorageAccount.StorageAccountName + " not changed.")
+        #}        
 }
 
 function Invoke-AzStorageAccountADObjectPasswordRotation {
@@ -4705,20 +4684,26 @@ function Invoke-AzStorageAccountADObjectPasswordRotation {
     PS> $storageAccounts | Invoke-AzStorageAccountADObjectPasswordRotation
     #>
 
-    [CmdletBinding(SupportsShouldProcess, ConfirmImpact="High")]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = "High")]
     param(
-        [Parameter(Mandatory=$true, Position=1, ParameterSetName="StorageAccountName")]
+        [Parameter(Mandatory = $true, Position = 1, ParameterSetName = "StorageAccountName")]
         [string]$ResourceGroupName,
 
-        [Parameter(Mandatory=$true, Position=2, ParameterSetName="StorageAccountName")]
+        [Parameter(Mandatory = $true, Position = 2, ParameterSetName = "StorageAccountName")]
         [string]$StorageAccountName,
 
         [Parameter(
-            Mandatory=$true, 
-            Position=1, 
-            ValueFromPipeline=$true, 
-            ParameterSetName="StorageAccount")]
-        [Microsoft.Azure.Commands.Management.Storage.Models.PSStorageAccount]$StorageAccount
+            Mandatory = $true, 
+            Position = 1, 
+            ValueFromPipeline = $true, 
+            ParameterSetName = "StorageAccount")]
+        [Microsoft.Azure.Commands.Management.Storage.Models.PSStorageAccount]$StorageAccount,
+
+        [Parameter(
+            Mandatory = $true,
+            Position = 3
+        )]
+        [PSCredential]$ADCredentials
     )
 
     begin {
@@ -4736,12 +4721,12 @@ function Invoke-AzStorageAccountADObjectPasswordRotation {
                 Assert-IsNativeAD -StorageAccountName $StorageAccountName -ResourceGroupName $ResourceGroupName
 
                 $testParams += @{ 
-                    "ResourceGroupName" = $ResourceGroupName; 
+                    "ResourceGroupName"  = $ResourceGroupName; 
                     "StorageAccountName" = $StorageAccountName 
                 }
 
                 $updateParams += @{
-                    "ResourceGroupName" = $ResourceGroupName;
+                    "ResourceGroupName"  = $ResourceGroupName;
                     "StorageAccountName" = $StorageAccountName
                 }
             }
@@ -4799,14 +4784,16 @@ function Invoke-AzStorageAccountADObjectPasswordRotation {
             }
         }
 
-        $caption = "Rotate from Kerberos key $RotateFromKerbKey to $RotateToKerbKey."
-        $verboseConfirmMessage = "This action will rotate the password from $RotateFromKerbKey to $RotateToKerbKey using Update-AzStorageAccountADObjectPassword." 
+        # $caption = "Rotate from Kerberos key $RotateFromKerbKey to $RotateToKerbKey."
+        # $verboseConfirmMessage = "This action will rotate the password from $RotateFromKerbKey to $RotateToKerbKey using Update-AzStorageAccountADObjectPassword." 
         
-        if ($PSCmdlet.ShouldProcess($verboseConfirmMessage, $verboseConfirmMessage, $caption)) {
-            Update-AzStorageAccountADObjectPassword @updateParams
-        } else {
-            Write-Verbose -Message "No password rotation performed."
-        }
+        #if ($PSCmdlet.ShouldProcess($verboseConfirmMessage, $verboseConfirmMessage, $caption)) {
+            write-verbose -message "This action will rotate the password from $RotateFromKerbKey to $RotateToKerbKey using Update-AzStorageAccountADObjectPassword." -verbose
+            Update-AzStorageAccountADObjectPassword @updateParams -ADCredentials $ADCredentials
+        #}
+        #else {
+        #    Write-Verbose -Message "No password rotation performed."
+        #}
     }
 }
 
@@ -4837,16 +4824,16 @@ function Update-AzStorageAccountAuthForAES256 {
     in the resource group myResourceGroup to Update-AzStorageAccountAuthForAES256.
     #>
 
-    [CmdletBinding(SupportsShouldProcess, ConfirmImpact="Medium")]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = "Medium")]
     param(
-        [Parameter(Mandatory=$true, Position=0, ParameterSetName="StorageAccountName")]
+        [Parameter(Mandatory = $true, Position = 0, ParameterSetName = "StorageAccountName")]
         [string]$ResourceGroupName,
 
-        [Parameter(Mandatory=$true, Position=1, ParameterSetName="StorageAccountName")]
+        [Parameter(Mandatory = $true, Position = 1, ParameterSetName = "StorageAccountName")]
         [Alias('Name')]
         [string]$StorageAccountName,
 
-        [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ParameterSetName="StorageAccount")]
+        [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true, ParameterSetName = "StorageAccount")]
         [Microsoft.Azure.Commands.Management.Storage.Models.PSStorageAccount]$StorageAccount
     ) 
 
@@ -4874,16 +4861,15 @@ function Update-AzStorageAccountAuthForAES256 {
             -ResourceGroupName $ResourceGroupName -StorageAccountName $StorageAccountName -ErrorAction Stop
         $domain = $activeDirectoryProperties.DomainName
 
-        try
-        {
-            switch($adObject.ObjectClass) {
+        try {
+            switch ($adObject.ObjectClass) {
                 "user" {
                     Write-Verbose -Message "Set AD user object '$($adObject.DistinguishedName)' to use AES256 for Kerberos authentication"
                     
                     $spnValue = Get-ServicePrincipalName `
-                    -StorageAccountName $StorageAccountName `
-                    -ResourceGroupName $ResourceGroupName `
-                    -ErrorAction Stop
+                        -StorageAccountName $StorageAccountName `
+                        -ResourceGroupName $ResourceGroupName `
+                        -ErrorAction Stop
 
                     $userPrincipalNameForAES256 = "$spnValue@$domain"
 
@@ -4897,8 +4883,8 @@ function Update-AzStorageAccountAuthForAES256 {
 
                     if ($userPrincipalName -ne $userPrincipalNameForAES256) {
                         Write-Error `
-                                -Message "The format of UserPrincipalName:$userPrincipalName is incorrect. please change it to: $userPrincipalNameForAES256 for AES256" `
-                                -ErrorAction stop
+                            -Message "The format of UserPrincipalName:$userPrincipalName is incorrect. please change it to: $userPrincipalNameForAES256 for AES256" `
+                            -ErrorAction stop
                     }
 
                     Set-ADUser -Identity $adObject.DistinguishedName -Server $domain `
@@ -4912,14 +4898,11 @@ function Update-AzStorageAccountAuthForAES256 {
                 }
             }
         }
-        catch
-        {
-            if (!$_.Exception.Message.Contains("Insufficient access rights to perform the operation"))
-            {
+        catch {
+            if (!$_.Exception.Message.Contains("Insufficient access rights to perform the operation")) {
                 Write-Error -Message "Please make sure the creator of the AD object has grants you the 'Full Control' permission to perform the operation on this AD Object. This can be done on the Active Directory Administrative Center." -ErrorAction Stop
             }
-            else
-            {
+            else {
                 Write-Error -Message "$_" -ErrorAction Stop
             }
         }
@@ -4931,8 +4914,8 @@ function Update-AzStorageAccountAuthForAES256 {
             -Domain $domain `
             -Force
 
-        Update-AzStorageAccountADObjectPassword -ResourceGroupname $ResourceGroupName -StorageAccountName $StorageAccountName `
-            -RotateToKerbKey kerb2 -ErrorAction Stop
+        write-verbose -message "blabla kerb update" -verbose
+        Update-AzStorageAccountADObjectPassword -RotateToKerbKey kerb2 -ResourceGroupname $ResourceGroupName -StorageAccountName $StorageAccountName -ADCredentials $ADCredentials -ErrorAction Stop
     }
 }
 
@@ -4983,44 +4966,47 @@ function Join-AzStorageAccount {
     in the resource group myResourceGroup to Join-AzStorageAccount.
     #>
 
-    [CmdletBinding(SupportsShouldProcess, ConfirmImpact="Medium")]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = "Medium")]
     param(
-        [Parameter(Mandatory=$true, Position=0, ParameterSetName="StorageAccountName")]
+        [Parameter(Mandatory = $true, Position = 0, ParameterSetName = "StorageAccountName")]
         [string]$ResourceGroupName,
 
-        [Parameter(Mandatory=$true, Position=1, ParameterSetName="StorageAccountName")]
+        [Parameter(Mandatory = $true, Position = 1, ParameterSetName = "StorageAccountName")]
         [Alias('Name')]
         [string]$StorageAccountName,
 
-        [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true, ParameterSetName="StorageAccount")]
+        [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true, ParameterSetName = "StorageAccount")]
         [Microsoft.Azure.Commands.Management.Storage.Models.PSStorageAccount]$StorageAccount,
 
-        [Parameter(Mandatory=$false, Position=2)]
+        [Parameter(Mandatory = $false, Position = 2)]
         [string]$Domain,
 
-        [Parameter(Mandatory=$false, Position=3)]
+        [Parameter(Mandatory = $false, Position = 3)]
         [ValidateSet("ServiceLogonAccount", "ComputerAccount")]
         [string]$DomainAccountType = "ComputerAccount",
 
-        [Parameter(Mandatory=$false, Position=4)]
+        [Parameter(Mandatory = $false, Position = 4)]
         [Alias('OrganizationUnitName')]
         [string]$OrganizationalUnitName,
 
-        [Parameter(Mandatory=$false, Position=5)]
+        [Parameter(Mandatory = $false, Position = 5)]
         [Alias('OrganizationUnitDistinguishedName')]
         [string]$OrganizationalUnitDistinguishedName,
 
-        [Parameter(Mandatory=$false, Position=5)]
+        [Parameter(Mandatory = $false, Position = 5)]
         [string]$ADObjectNameOverride,
 
-        [Parameter(Mandatory=$false, Position=6)]
+        [Parameter(Mandatory = $false, Position = 6)]
         [switch]$OverwriteExistingADObject,
 
-        [Parameter(Mandatory=$false, Position=7)]
-        [System.Collections.Generic.HashSet[string]]$EncryptionType = @("RC4","AES256"),
+        [Parameter(Mandatory = $false, Position = 7)]
+        [System.Collections.Generic.HashSet[string]]$EncryptionType = @("RC4", "AES256"),
 
-        [Parameter(Mandatory=$false, Position=8)]
-        [string]$SamAccountName
+        [Parameter(Mandatory = $false, Position = 8)]
+        [string]$SamAccountName,
+
+        [Parameter(Mandatory = $true)]
+        [PSCredential]$ADCredentials
     ) 
 
     begin {
@@ -5036,8 +5022,8 @@ function Join-AzStorageAccount {
             $PSBoundParameters.ContainsKey("OrganizationalUnitDistinguishedName")
         ) {
             Write-Error `
-                    -Message "Only one of OrganizationalUnitName and OrganizationalUnitDistinguishedName should be specified." `
-                    -ErrorAction Stop
+                -Message "Only one of OrganizationalUnitName and OrganizationalUnitDistinguishedName should be specified." `
+                -ErrorAction Stop
         }
 
         if ($PSCmdlet.ParameterSetName -eq "StorageAccount") {
@@ -5053,7 +5039,8 @@ function Join-AzStorageAccount {
             if ($StorageAccountName.Length -gt 15) {
                 $randomSuffix = Get-RandomString -StringLength 5 -AlphanumericOnly
                 $SamAccountName = $StorageAccountName.Substring(0, 10) + $randomSuffix
-            } else {
+            }
+            else {
                 $SamAccountName = $StorageAccountName
             }
         }
@@ -5079,11 +5066,11 @@ function Join-AzStorageAccount {
 
             # Create the service account object for the storage account.
             $newParams = @{
-                "ADObjectName" = $ADObjectNameOverride;
+                "ADObjectName"       = $ADObjectNameOverride;
                 "StorageAccountName" = $StorageAccountName;
-                "ResourceGroupName" = $ResourceGroupName;
-                "ObjectType" = $DomainAccountType;
-                "SamAccountName" = $SamAccountName
+                "ResourceGroupName"  = $ResourceGroupName;
+                "ObjectType"         = $DomainAccountType;
+                "SamAccountName"     = $SamAccountName
             }
 
             if ($PSBoundParameters.ContainsKey("Domain")) {
@@ -5102,7 +5089,7 @@ function Join-AzStorageAccount {
                 $newParams += @{ "OverwriteExistingADObject" = $OverwriteExistingADObject }
             }
 
-            $packedResult = New-ADAccountForStorageAccount @newParams -ErrorAction Stop
+            $packedResult = New-ADAccountForStorageAccount @newParams -ADCredentials $ADCredentials -ErrorAction Stop
             $ADObjectNameOverride = $packedResult["ADObjectName"]
             $Domain = $packedResult["Domain"]
 
@@ -5116,8 +5103,8 @@ function Join-AzStorageAccount {
                 -Domain $Domain `
                 -Force
 
-            Update-AzStorageAccountADObjectPassword -ResourceGroupname $ResourceGroupName -StorageAccountName $StorageAccountName `
-                -RotateToKerbKey kerb2 -ErrorAction Stop
+            write-verbose -message "running update az storage account ado password with ad creds" -verbose
+            Update-AzStorageAccountADObjectPassword -RotateToKerbKey kerb2 -ResourceGroupname $ResourceGroupName -StorageAccountName $StorageAccountName -ADCredentials $ADCredentials -ErrorAction Stop
         }
     }
 }
@@ -5129,7 +5116,7 @@ function Get-ADDnsRootFromDistinguishedName {
     [CmdletBinding()]
 
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [ValidatePattern("^(CN=([a-z]|[0-9]|[ .])+)((,OU=([a-z]|[0-9]|[ .])+)*)((,DC=([a-z]|[0-9]|[ .])+)+)$")]
         [string]$DistinguishedName
     )
@@ -5141,7 +5128,7 @@ function Get-ADDnsRootFromDistinguishedName {
 
         $sb = [System.Text.StringBuilder]::new()
 
-        for($i = 0; $i -lt $dcPath.Length; $i++) {
+        for ($i = 0; $i -lt $dcPath.Length; $i++) {
             if ($i -gt 0) {
                 $sb.Append(".") | Out-Null
             }
@@ -5178,10 +5165,10 @@ function Expand-AzResourceId {
     [CmdletBinding()]
     param(
         [Parameter(
-            Mandatory=$true, 
-            Position=0, 
-            ValueFromPipeline=$true, 
-            ValueFromPipelineByPropertyName=$true)]
+            Mandatory = $true, 
+            Position = 0, 
+            ValueFromPipeline = $true, 
+            ValueFromPipelineByPropertyName = $true)]
         [Alias("Scope", "Id")]
         [string]$ResourceId
     )
@@ -5194,10 +5181,11 @@ function Expand-AzResourceId {
         $key = [string]$null
         $value = [string]$null
 
-        for($i=0; $i -lt $split.Length; $i++) {
+        for ($i = 0; $i -lt $split.Length; $i++) {
             if (!($i % 2)) {
                 $key = $split[$i]
-            } else {
+            }
+            else {
                 $value = $split[$i]
                 $result.Add($key, $value)
 
@@ -5234,14 +5222,14 @@ function Compress-AzResourceId {
 
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
+        [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true)]
         [OrderedDictionary]$ExpandedResourceId
     )   
 
     process {
         $sb = [StringBuilder]::new()
 
-        foreach($entry in $ExpandedResourceId.GetEnumerator()) {
+        foreach ($entry in $ExpandedResourceId.GetEnumerator()) {
             $sb.Append(("/" + $entry.Key + "/" + $entry.Value)) | Out-Null
         }
 
@@ -5261,7 +5249,7 @@ function Request-ConnectMsGraph {
 
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string[]]$Scopes
     )
 
@@ -5298,10 +5286,11 @@ function Get-AzCurrentAzureADUser {
 
     if ($friendlyLoginSplit[1] -in $domainNames) {
         return $friendlyLogin
-    } else {
+    }
+    else {
         $username = ($friendlyLoginSplit[0] + "_" + $friendlyLoginSplit[1] + "#EXT#")
 
-        foreach($domain in $domains) {
+        foreach ($domain in $domains) {
             $possibleName = ($username + "@" + $domain.Id)
             $foundUser = Get-AzADUser -UserPrincipalName $possibleName
             if ($null -ne $foundUser) {
@@ -5336,20 +5325,20 @@ function Test-AzPermission {
 
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [Alias("ResourceId", "Id")]
         [string]$Scope,
 
-        [Parameter(Mandatory=$true, ParameterSetName="OperationsName")]
+        [Parameter(Mandatory = $true, ParameterSetName = "OperationsName")]
         [string[]]$OperationName,
 
-        [Parameter(Mandatory=$true, ParameterSetName="OperationsObj")]
+        [Parameter(Mandatory = $true, ParameterSetName = "OperationsObj")]
         [Microsoft.Azure.Commands.Resources.Models.PSResourceProviderOperation[]]$Operation,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]$SignInName,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [switch]$RefreshCache
     )
 
@@ -5358,22 +5347,23 @@ function Test-AzPermission {
         if (!$ClassicAdministratorsSet -or $RefreshCache) {
             if (!$ClassicAdministratorsSet) {
                 $ClassicAdministratorsSet = $true
-            } else {
+            }
+            else {
                 $ClassicAdministrators.Clear()
             }
 
             $ResourceIdComponents = $Scope | Expand-AzResourceId
             $subscription = $ResourceIdComponents.subscriptions
             $roleAssignments = Get-AzRoleAssignment `
-                    -Scope "/subscriptions/$subscription" `
-                    -IncludeClassicAdministrators | `
+                -Scope "/subscriptions/$subscription" `
+                -IncludeClassicAdministrators | `
                 Where-Object { $_.Scope -eq "/subscriptions/$subscription" }
             
             $_classicAdministrators = $roleAssignments | `
                 Where-Object { 
-                    $split = $_.RoleDefinitionName.Split(";"); 
-                    "CoAdministrator" -in $split -or "ServiceAdministrator" -in $split
-                }
+                $split = $_.RoleDefinitionName.Split(";"); 
+                "CoAdministrator" -in $split -or "ServiceAdministrator" -in $split
+            }
             
             foreach ($admin in $_classicAdministrators) {
                 $ClassicAdministrators.Add($admin.SignInName) | Out-Null
@@ -5394,7 +5384,7 @@ function Test-AzPermission {
 
         # Build lookup dictionary of which operations the user has. Start with having none.
         $userHasOperation = [Dictionary[string, bool]]::new()
-        foreach($op in $Operation) {
+        foreach ($op in $Operation) {
             $userHasOperation.Add($op.Operation, $false)
         }        
 
@@ -5408,7 +5398,7 @@ function Test-AzPermission {
         }
 
         if ($ClassicAdministrators.Contains($ClassicSignInName)) {
-            foreach($op in $Operation) {
+            foreach ($op in $Operation) {
                 $userHasOperation[$op.Operation] = $true
             }
 
@@ -5421,18 +5411,18 @@ function Test-AzPermission {
             $OperationCache.Clear()
         }
 
-        foreach($roleAssignment in $roleAssignments) {
+        foreach ($roleAssignment in $roleAssignments) {
             $operationsInRole = [string[]]$null
             if (!$OperationCache.TryGetValue($roleAssignment.RoleDefinitionId, [ref]$operationsInRole)) {
                 $operationsInRole = Get-AzRoleDefinition -Id $roleAssignment.RoleDefinitionId
                 $OperationCache.Add($roleAssignment.RoleDefinitionId, $operationsInRole)
             }
 
-            foreach($op in $Operation) {
+            foreach ($op in $Operation) {
                 $matches = $false
 
                 if (!$op.IsDataAction) {
-                    foreach($action in $operationsInRole.Actions) {
+                    foreach ($action in $operationsInRole.Actions) {
                         if ($op.Operation -like $action) {
                             $matches = $true
                             break
@@ -5440,15 +5430,16 @@ function Test-AzPermission {
                     }
 
                     if ($matches) {
-                        foreach($notAction in $operationsInRole.NotActions) {
+                        foreach ($notAction in $operationsInRole.NotActions) {
                             if ($op.Operation -like $notAction) {
                                 $matches = $false
                                 break
                             }
                         }
                     }
-                } else {
-                    foreach($dataAction in $operationsInRole.DataActions) {
+                }
+                else {
+                    foreach ($dataAction in $operationsInRole.DataActions) {
                         if ($op.Operation -like $dataAction) {
                             $matches = $true
                             break
@@ -5456,7 +5447,7 @@ function Test-AzPermission {
                     }
 
                     if ($matches) {
-                        foreach($notDataAction in $operationsInRole.NotDataActions) {
+                        foreach ($notDataAction in $operationsInRole.NotDataActions) {
                             if ($op.Operation -like $notDataAction) {
                                 $matches = $false
                                 break
@@ -5470,12 +5461,12 @@ function Test-AzPermission {
         }
 
         $denyAssignments = Get-AzDenyAssignment -Scope $Scope -SignInName $SignInName
-        foreach($denyAssignment in $denyAssignments) {
-            foreach($op in $Operation) {
+        foreach ($denyAssignment in $denyAssignments) {
+            foreach ($op in $Operation) {
                 $matches = $false
 
                 if (!$op.IsDataAction) {
-                    foreach($action in $denyAssignment.Actions) {
+                    foreach ($action in $denyAssignment.Actions) {
                         if ($op.Operation -like $action) {
                             $matches = $true
                             break
@@ -5483,15 +5474,16 @@ function Test-AzPermission {
                     }
 
                     if ($matches) {
-                        foreach($notAction in $denyAssignment.NotActions) {
+                        foreach ($notAction in $denyAssignment.NotActions) {
                             if ($op.Operation -like $notAction) {
                                 $matches = $false
                                 break
                             }
                         }
                     }
-                } else {
-                    foreach($dataAction in $denyAssignment.DataActions) {
+                }
+                else {
+                    foreach ($dataAction in $denyAssignment.DataActions) {
                         if ($op.Operation -like $dataAction) {
                             $matches = $true
                             break
@@ -5499,7 +5491,7 @@ function Test-AzPermission {
                     }
 
                     if ($matches) {
-                        foreach($notDataAction in $denyAssignment.NotDataActions) {
+                        foreach ($notDataAction in $denyAssignment.NotDataActions) {
                             if ($op.Operation -like $notDataAction) {
                                 $matches = $false
                                 break
@@ -5530,14 +5522,14 @@ function Assert-AzPermission {
 
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [Alias("ResourceId", "Id")]
         [string]$Scope,
 
-        [Parameter(Mandatory=$true, ParameterSetName="OperationsName")]
+        [Parameter(Mandatory = $true, ParameterSetName = "OperationsName")]
         [string[]]$OperationName,
 
-        [Parameter(Mandatory=$true, ParameterSetName="OperationsObj")]
+        [Parameter(Mandatory = $true, ParameterSetName = "OperationsObj")]
         [Microsoft.Azure.Commands.Resources.Models.PSResourceProviderOperation[]]$Operation
     )
 
@@ -5571,7 +5563,7 @@ function Assert-AzPermission {
         if ($null -ne $falseValues) {
             $errorBuilder = [StringBuilder]::new()
             $errorBuilder.Append("The current user lacks the following permissions: ") | Out-Null
-            for($i=0; $i -lt $falseValues.Length; $i++) {
+            for ($i = 0; $i -lt $falseValues.Length; $i++) {
                 if ($i -gt 0) {
                     $errorBuilder.Append(", ") | Out-Null
                 }
@@ -5621,7 +5613,7 @@ class DnsForwardingRule {
         $this.AzureResource = $azureResource
         $this.MasterServers = [HashSet[string]]::new()
 
-        foreach($item in $masterServers) {
+        foreach ($item in $masterServers) {
             $this.MasterServers.Add($item.ToString()) | Out-Null
         }
     }
@@ -5706,7 +5698,7 @@ class DnsForwardingRuleSet {
     DnsForwardingRuleSet([IEnumerable]$dnsForwardingRules) {
         $this.DnsForwardingRules = [HashSet[DnsForwardingRule]]::new()
 
-        foreach($rule in $dnsForwardingRules) {
+        foreach ($rule in $dnsForwardingRules) {
             $this.DnsForwardingRules.Add($rule) | Out-Null
         }
     }
@@ -5729,7 +5721,7 @@ class DnsForwardingRuleSet {
         }
 
         $this.DnsForwardingRules = [HashSet[DnsForwardingRule]]::new()
-        foreach($rule in $customObject.DnsForwardingRules) {
+        foreach ($rule in $customObject.DnsForwardingRules) {
             $this.DnsForwardingRules.Add([DnsForwardingRule]::new($rule)) | Out-Null
         }
     }
@@ -5740,29 +5732,29 @@ function Add-AzDnsForwardingRule {
     
     param(
         [Parameter(
-            Mandatory=$true, 
-            ValueFromPipeline=$true, 
-            ValueFromPipelineByPropertyName=$true)]
+            Mandatory = $true, 
+            ValueFromPipeline = $true, 
+            ValueFromPipelineByPropertyName = $true)]
         [AllowEmptyCollection()]
         [DnsForwardingRuleSet]$DnsForwardingRuleSet,
 
-        [Parameter(Mandatory=$true, ParameterSetName="AzureEndpointParameterSet")]
+        [Parameter(Mandatory = $true, ParameterSetName = "AzureEndpointParameterSet")]
         [ValidateSet(
             "StorageAccountEndpoint", 
             "SqlDatabaseEndpoint", 
             "KeyVaultEndpoint")]
         [string]$AzureEndpoint,
         
-        [Parameter(Mandatory=$true, ParameterSetName="ManualParameterSet")]
+        [Parameter(Mandatory = $true, ParameterSetName = "ManualParameterSet")]
         [string]$DomainName,
         
-        [Parameter(Mandatory=$false, ParameterSetName="ManualParameterSet")]
+        [Parameter(Mandatory = $false, ParameterSetName = "ManualParameterSet")]
         [switch]$AzureResource,
 
-        [Parameter(Mandatory=$true, ParameterSetName="ManualParameterSet")]
+        [Parameter(Mandatory = $true, ParameterSetName = "ManualParameterSet")]
         [System.Collections.Generic.HashSet[string]]$MasterServers,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [ValidateSet(
             "Overwrite",
             "Merge",
@@ -5781,7 +5773,7 @@ function Add-AzDnsForwardingRule {
             }
             $environmentEndpoints = Get-AzEnvironment -Name $subscriptionContext.Environment
 
-            switch($AzureEndpoint) {
+            switch ($AzureEndpoint) {
                 "StorageAccountEndpoint" {
                     $DomainName = $environmentEndpoints.StorageEndpointSuffix
                     $AzureResource = $true
@@ -5792,7 +5784,7 @@ function Add-AzDnsForwardingRule {
 
                 "SqlDatabaseEndpoint" {
                     $reconstructedEndpoint = [string]::Join(".", (
-                        $environmentEndpoints.SqlDatabaseDnsSuffix.Split(".") | Where-Object { ![string]::IsNullOrEmpty($_) }))
+                            $environmentEndpoints.SqlDatabaseDnsSuffix.Split(".") | Where-Object { ![string]::IsNullOrEmpty($_) }))
                     
                     $DomainName = $reconstructedEndpoint
                     $AzureResource = $true
@@ -5815,7 +5807,7 @@ function Add-AzDnsForwardingRule {
         $conflictRule = [DnsForwardingRule]$null
 
         if ($forwardingRules.TryGetValue($forwardingRule, [ref]$conflictRule)) {
-            switch($ConflictBehavior) {
+            switch ($ConflictBehavior) {
                 "Overwrite" {
                     $forwardingRules.Remove($conflictRule) | Out-Null
                     $forwardingRules.Add($forwardingRule) | Out-Null
@@ -5827,7 +5819,7 @@ function Add-AzDnsForwardingRule {
                             "Azure resource status does not match for domain name $domain.", "AzureResource")
                     }
 
-                    foreach($newMasterServer in $forwardingRule.MasterServers) {
+                    foreach ($newMasterServer in $forwardingRule.MasterServers) {
                         $conflictRule.MasterServers.Add($newMasterServer) | Out-Null
                     }
                 }
@@ -5837,7 +5829,8 @@ function Add-AzDnsForwardingRule {
                         "Domain name $domainName already exists in ruleset.", "DnsForwardingRules") 
                 }
             }
-        } else {
+        }
+        else {
             $forwardingRules.Add($forwardingRule) | Out-Null
         }
 
@@ -5849,42 +5842,43 @@ function New-AzDnsForwardingRuleSet {
     [CmdletBinding()]
 
     param(
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [ValidateSet(
             "StorageAccountEndpoint", 
             "SqlDatabaseEndpoint", 
             "KeyVaultEndpoint")]
         [System.Collections.Generic.HashSet[string]]$AzureEndpoints,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [switch]$SkipOnPremisesDns,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [System.Collections.Generic.HashSet[string]]$OnPremDnsHostNames,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]$OnPremDomainName,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [switch]$SkipParentDomain
     )
 
     Request-ADFeature
 
     $ruleSet = [DnsForwardingRuleSet]::new()
-    foreach($azureEndpoint in $AzureEndpoints) {
+    foreach ($azureEndpoint in $AzureEndpoints) {
         Add-AzDnsForwardingRule -DnsForwardingRuleSet $ruleSet -AzureEndpoint $azureEndpoint | Out-Null
     }
 
     if (!$SkipOnPremisesDns) {
         if ([string]::IsNullOrEmpty($OnPremDomainName)) {
             $domain = Get-ADDomainInternal
-        } else {
+        }
+        else {
             $domain = Get-ADDomainInternal -Identity $OnPremDomainName
         }
 
         if (!$SkipParentDomain) {
-            while($null -ne $domain.ParentDomain) {
+            while ($null -ne $domain.ParentDomain) {
                 $domain = Get-ADDomainInternal -Identity $domain.ParentDomain
             }
         }
@@ -5893,7 +5887,8 @@ function New-AzDnsForwardingRuleSet {
             $onPremDnsServers = Resolve-DnsNameInternal -Name $domain.DNSRoot | `
                 Where-Object { $_.Type -eq "A" } | `
                 Select-Object -ExpandProperty IPAddress
-        } else {
+        }
+        else {
             $onPremDnsServers = $OnPremDnsHostNames | `
                 Resolve-DnsNameInternal | `
                 Where-Object { $_.Type -eq "A" } | `
@@ -5901,9 +5896,9 @@ function New-AzDnsForwardingRuleSet {
         }
 
         Add-AzDnsForwardingRule `
-                -DnsForwardingRuleSet $ruleSet `
-                -DomainName $domain.DNSRoot `
-                -MasterServers $OnPremDnsServers | `
+            -DnsForwardingRuleSet $ruleSet `
+            -DomainName $domain.DNSRoot `
+            -MasterServers $OnPremDnsServers | `
             Out-Null
     }
 
@@ -5911,7 +5906,7 @@ function New-AzDnsForwardingRuleSet {
 }
 
 function Clear-DnsClientCacheInternal {
-    switch((Get-OSPlatform)) {
+    switch ((Get-OSPlatform)) {
         "Windows" {
             Clear-DnsClientCache
         }
@@ -5931,25 +5926,25 @@ function Clear-DnsClientCacheInternal {
 }
 
 function Push-DnsServerConfiguration {
-    [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact="High")]
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = "High")]
 
     param(
-        [Parameter(Mandatory=$true, ParameterSetName="AzDnsServer")]
-        [Parameter(Mandatory=$true, ParameterSetName="OnPremDnsServer")]
+        [Parameter(Mandatory = $true, ParameterSetName = "AzDnsServer")]
+        [Parameter(Mandatory = $true, ParameterSetName = "OnPremDnsServer")]
         [DnsForwardingRuleSet]$DnsForwardingRuleSet,
 
-        [Parameter(Mandatory=$false, ParameterSetName="AzDnsServer")]
-        [Parameter(Mandatory=$false, ParameterSetName="OnPremDnsServer")]
+        [Parameter(Mandatory = $false, ParameterSetName = "AzDnsServer")]
+        [Parameter(Mandatory = $false, ParameterSetName = "OnPremDnsServer")]
         [ValidateSet(
             "Overwrite", 
             "Merge", 
             "Disallow")]
         [string]$ConflictBehavior = "Overwrite",
 
-        [Parameter(Mandatory=$true, ParameterSetName="OnPremDnsServer")]
+        [Parameter(Mandatory = $true, ParameterSetName = "OnPremDnsServer")]
         [switch]$OnPremDnsServer,
 
-        [Parameter(Mandatory=$true, ParameterSetName="OnPremDnsServer")]
+        [Parameter(Mandatory = $true, ParameterSetName = "OnPremDnsServer")]
         [System.Collections.Generic.HashSet[string]]$AzDnsForwarderIpAddress
     )
 
@@ -5964,27 +5959,29 @@ function Push-DnsServerConfiguration {
             $rules = $DnsForwardingRuleSet | `
                 Select-Object -ExpandProperty DnsForwardingRules | `
                 Where-Object { $_.AzureResource }
-        } else {
+        }
+        else {
             $rules = $DnsForwardingRuleSet | `
                 Select-Object -ExpandProperty DnsForwardingRules
         }
 
-        foreach($rule in $rules) {
+        foreach ($rule in $rules) {
             $zone = Get-DnsServerZone | `
                 Where-Object { $_.ZoneName -eq $rule.DomainName }
 
             if ($OnPremDnsServer) {
                 $masterServers = $AzDnsForwarderIpAddress
-            } else {
+            }
+            else {
                 $masterServers = $rule.MasterServers
             }
 
             if ($null -ne $zone) {
-                switch($ConflictBehavior) {
+                switch ($ConflictBehavior) {
                     "Overwrite" {
                         $zone | Remove-DnsServerZone `
-                                -Confirm:$false `
-                                -Force
+                            -Confirm:$false `
+                            -Force
                     }
 
                     "Merge" {
@@ -5995,18 +5992,19 @@ function Push-DnsServerConfiguration {
                         if ($OnPremDnsServer) {
                             $masterServers = [System.Collections.Generic.HashSet[string]]::new(
                                 $AzDnsForwarderIpAddress)
-                        } else {
+                        }
+                        else {
                             $masterServers = [System.Collections.Generic.HashSet[string]]::new(
                                 $masterServers)
                         }               
 
-                        foreach($existingServer in $existingMasterServers) {
+                        foreach ($existingServer in $existingMasterServers) {
                             $masterServers.Add($existingServer) | Out-Null
                         }
                         
                         $zone | Remove-DnsServerZone `
-                                -Confirm:$false `
-                                -Force
+                            -Confirm:$false `
+                            -Force
                     }
 
                     "Disallow" {
@@ -6022,13 +6020,13 @@ function Push-DnsServerConfiguration {
             }
             
             Add-DnsServerConditionalForwarderZone `
-                    -Name $rule.DomainName `
-                    -MasterServers $masterServers
+                -Name $rule.DomainName `
+                -MasterServers $masterServers
             
             Clear-DnsClientCache
             Clear-DnsServerCache `
-                    -Confirm:$false `
-                    -Force
+                -Confirm:$false `
+                -Force
         }
     }
 }
@@ -6036,29 +6034,29 @@ function Push-DnsServerConfiguration {
 function Confirm-AzDnsForwarderPreReqs {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true, ParameterSetName="NameParameterSet")]
+        [Parameter(Mandatory = $true, ParameterSetName = "NameParameterSet")]
         [string]$VirtualNetworkResourceGroupName,
 
-        [Parameter(Mandatory=$true, ParameterSetName="NameParameterSet")]
+        [Parameter(Mandatory = $true, ParameterSetName = "NameParameterSet")]
         [string]$VirtualNetworkName,
 
-        [Parameter(Mandatory=$true, ParameterSetName="NameParameterSet")]
-        [Parameter(Mandatory=$true, ParameterSetName="VNetObjectParameterSet")]
+        [Parameter(Mandatory = $true, ParameterSetName = "NameParameterSet")]
+        [Parameter(Mandatory = $true, ParameterSetName = "VNetObjectParameterSet")]
         [string]$VirtualNetworkSubnetName,
 
-        [Parameter(Mandatory=$true, ParameterSetName="VNetObjectParameterSet")]
+        [Parameter(Mandatory = $true, ParameterSetName = "VNetObjectParameterSet")]
         [Microsoft.Azure.Commands.Network.Models.PSVirtualNetwork]$VirtualNetwork,
 
-        [Parameter(Mandatory=$true, ParameterSetName="SubnetObjectParameterSet")]
+        [Parameter(Mandatory = $true, ParameterSetName = "SubnetObjectParameterSet")]
         [Microsoft.Azure.Commands.Network.Models.PSSubnet]$VirtualNetworkSubnet,
         
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]$DomainToJoin,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]$DnsForwarderRootName = "DnsFwder",
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [int]$DnsForwarderRedundancyCount = 2
     )
 
@@ -6067,7 +6065,7 @@ function Confirm-AzDnsForwarderPreReqs {
     Assert-DnsForwarderArmTemplateVersion
 
     # Check networking parameters: VirtualNetwork and VirtualNetworkSubnet
-    switch($PSCmdlet.ParameterSetName) {
+    switch ($PSCmdlet.ParameterSetName) {
         "NameParameterSet" {
             # Get/verify virtual network is there.
             $VirtualNetwork = Get-AzVirtualNetwork `
@@ -6077,8 +6075,8 @@ function Confirm-AzDnsForwarderPreReqs {
             
             if ($null -eq $VirtualNetwork) {
                 Write-Error `
-                        -Message "Virtual network $virtualNetworkName does not exist in resource group $virtualNetworkResourceGroupName." `
-                        -ErrorAction Stop
+                    -Message "Virtual network $virtualNetworkName does not exist in resource group $virtualNetworkResourceGroupName." `
+                    -ErrorAction Stop
             }
 
             # Verify subnet
@@ -6088,8 +6086,8 @@ function Confirm-AzDnsForwarderPreReqs {
 
             if ($null -eq $virtualNetworkSubnet) {
                 Write-Error `
-                        -Message "Subnet $virtualNetworkSubnetName does not exist in virtual network $($VirtualNetwork.Name)." `
-                        -ErrorAction Stop
+                    -Message "Subnet $virtualNetworkSubnetName does not exist in virtual network $($VirtualNetwork.Name)." `
+                    -ErrorAction Stop
             }
         }
 
@@ -6115,8 +6113,8 @@ function Confirm-AzDnsForwarderPreReqs {
 
             if ($null -eq $VirtualNetworkSubnet) {
                 Write-Error `
-                        -Message "Subnet $virtualNetworkSubnetName does not exist in virtual network $($VirtualNetwork.Name)." `
-                        -ErrorAction Stop
+                    -Message "Subnet $virtualNetworkSubnetName does not exist in virtual network $($VirtualNetwork.Name)." `
+                    -ErrorAction Stop
             }
         }
 
@@ -6135,8 +6133,8 @@ function Confirm-AzDnsForwarderPreReqs {
             
             if ($null -eq $VirtualNetwork) {
                 Write-Error `
-                        -Message "Virtual network $virtualNetworkName does not exist in resource group $virtualNetworkResourceGroupName." `
-                        -ErrorAction Stop
+                    -Message "Virtual network $virtualNetworkName does not exist in resource group $virtualNetworkResourceGroupName." `
+                    -ErrorAction Stop
             }
             
             # Verify subnet object
@@ -6146,8 +6144,8 @@ function Confirm-AzDnsForwarderPreReqs {
             
             if ($null -eq $VirtualNetworkSubnet) {
                 Write-Error `
-                        -Message "Subnet $VirtualNetworkSubnetName could not be found." `
-                        -ErrorAction Stop
+                    -Message "Subnet $VirtualNetworkSubnetName could not be found." `
+                    -ErrorAction Stop
             }
         }
 
@@ -6159,10 +6157,12 @@ function Confirm-AzDnsForwarderPreReqs {
     # Check domain
     if ([string]::IsNullOrEmpty($DomainToJoin)) {
         $DomainToJoin = (Get-ADDomainInternal).DNSRoot
-    } else {
+    }
+    else {
         try {
             $DomainToJoin = (Get-ADDomainInternal -Identity $DomainToJoin).DNSRoot
-        } catch {
+        }
+        catch {
             throw [System.ArgumentException]::new(
                 "Could not find the domain $DomainToJoin", "DomainToJoin")
         }
@@ -6173,14 +6173,15 @@ function Confirm-AzDnsForwarderPreReqs {
         param($name, $rootName, $domainName)
 
         $str = $name.
-            Replace(".$domainName", "").
-            ToLowerInvariant().
-            Replace("$($rootName.ToLowerInvariant())-", "")
+        Replace(".$domainName", "").
+        ToLowerInvariant().
+        Replace("$($rootName.ToLowerInvariant())-", "")
         
         $i = -1
         if ([int]::TryParse($str, [ref]$i)) {
             return $i
-        } else {
+        }
+        else {
             return -1
         }
     }
@@ -6189,11 +6190,11 @@ function Confirm-AzDnsForwarderPreReqs {
     # not sure that the actual boundary conditions (greater than 999) being tested.
     $filterCriteria = ($DnsForwarderRootName + "-*")
     $incrementorSeed = Get-ADComputerInternal -Filter "Name -like '$filterCriteria'" | 
-        Select-Object Name, 
-            @{ 
-                Name = "Incrementor"; 
-                Expression = { $intCaster.Invoke($_.DNSHostName, $DnsForwarderRootName, $DomainToJoin) } 
-            } | `
+    Select-Object Name, 
+    @{ 
+        Name       = "Incrementor"; 
+        Expression = { $intCaster.Invoke($_.DNSHostName, $DnsForwarderRootName, $DomainToJoin) } 
+    } | `
         Select-Object -ExpandProperty Incrementor | `
         Measure-Object -Maximum | `
         Select-Object -ExpandProperty Maximum
@@ -6204,31 +6205,32 @@ function Confirm-AzDnsForwarderPreReqs {
 
     if ($incrementorSeed -lt 1000) {
         $incrementorSeed++
-    } else {
+    }
+    else {
         Write-Error `
-                -Message "There are more than 1000 DNS forwarders domain joined to this domain. Chose another DnsForwarderRootName." `
-                -ErrorAction Stop
+            -Message "There are more than 1000 DNS forwarders domain joined to this domain. Chose another DnsForwarderRootName." `
+            -ErrorAction Stop
     }
 
-    $dnsForwarderNames = $incrementorSeed..($incrementorSeed+$DnsForwarderRedundancyCount-1) | `
+    $dnsForwarderNames = $incrementorSeed..($incrementorSeed + $DnsForwarderRedundancyCount - 1) | `
         ForEach-Object { $DnsForwarderRootName + "-" + $_.ToString() }
 
     return @{
-        "VirtualNetwork" = $VirtualNetwork;
-        "VirtualNetworkSubnet" = $VirtualNetworkSubnet;
-        "DomainToJoin" = $DomainToJoin;
+        "VirtualNetwork"               = $VirtualNetwork;
+        "VirtualNetworkSubnet"         = $VirtualNetworkSubnet;
+        "DomainToJoin"                 = $DomainToJoin;
         "DnsForwarderResourceIterator" = $incrementorSeed;
-        "DnsForwarderNames" = $dnsForwarderNames
+        "DnsForwarderNames"            = $dnsForwarderNames
     }
 }
 
 function Join-AzDnsForwarder {
-    [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact="Medium")]
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = "Medium")]
     param(
-        [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [string]$DomainToJoin,
 
-        [Parameter(Mandatory=$true, ValueFromPipelineByPropertyName=$true)]
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [string[]]$DnsForwarderNames
     )
 
@@ -6239,11 +6241,11 @@ function Join-AzDnsForwarder {
         if ($PSCmdlet.ShouldProcess($verboseConfirmMessage, $verboseConfirmMessage, $caption)) {
             $odjBlobs = $DnsForwarderNames | `
                 Register-OfflineMachine `
-                    -Domain $DomainToJoin `
-                    -ErrorAction Stop
+                -Domain $DomainToJoin `
+                -ErrorAction Stop
         
             return @{ 
-                "Domain" = $DomainToJoin; 
+                "Domain"          = $DomainToJoin; 
                 "DomainJoinBlobs" = $odjBlobs 
             }
         }
@@ -6254,19 +6256,19 @@ function Join-AzDnsForwarder {
 function Get-ArmTemplateObject {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
         [string]$ArmTemplateUri
     )
 
     process {
         $request = Invoke-WebRequest `
-                -Uri $ArmTemplateUri `
-                -UseBasicParsing 
+            -Uri $ArmTemplateUri `
+            -UseBasicParsing 
 
         if ($request.StatusCode -ne 200) {
             Write-Error `
-                    -Message "Unexpected status code when retrieving ARM template: $($request.StatusCode)" `
-                    -ErrorAction Stop
+                -Message "Unexpected status code when retrieving ARM template: $($request.StatusCode)" `
+                -ErrorAction Stop
         }
 
         return ($request.Content | ConvertFrom-Json -Depth 100)
@@ -6276,7 +6278,7 @@ function Get-ArmTemplateObject {
 function Get-ArmTemplateVersion {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
         [PSCustomObject]$ArmTemplateObject
     )
 
@@ -6313,47 +6315,49 @@ function Assert-DnsForwarderArmTemplateVersion {
         $templateVersion.Minor -lt $DnsForwarderTemplateVersion.Minor
     ) {
         Write-Error `
-                -Message "The template for deploying DNS forwarders in the Azure repository is an older version than the AzureFilesHybrid module expects. This likely indicates that you are using a development version of the AzureFilesHybrid module and should override the DnsForwarderTemplate config parameter on module load (or in AzureFilesHybrid.psd1) to match the correct development version." `
-                -ErrorAction Stop
-    } elseif (
+            -Message "The template for deploying DNS forwarders in the Azure repository is an older version than the AzureFilesHybrid module expects. This likely indicates that you are using a development version of the AzureFilesHybrid module and should override the DnsForwarderTemplate config parameter on module load (or in AzureFilesHybrid.psd1) to match the correct development version." `
+            -ErrorAction Stop
+    }
+    elseif (
         $templateVersion.Major -gt $DnsForwarderTemplateVersion.Major -or 
         $templateVersion.Minor -gt $DnsForwarderTemplateVersion.Minor
     ) {
         Write-Error -Message "The template for deploying DNS forwarders in the Azure repository is a newer version than the AzureFilesHybrid module expects. This likely indicates that you are using an older version of the AzureFilesHybrid module and should upgrade. This can be done by getting the newest version of the module from https://github.com/Azure-Samples/azure-files-samples/releases." -ErrorAction Stop
-    } else {
+    }
+    else {
         Write-Verbose -Message "DNS forwarder ARM template version is $($templateVersion.ToString())."
         Write-Verbose -Message "Expected DnsForwarderTemplateVersion version is $($DnsForwarderTemplateVersion.ToString())."
     }
 }
 
 function Invoke-AzDnsForwarderDeployment {
-    [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact="Medium")]
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = "Medium")]
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [DnsForwardingRuleSet]$DnsForwardingRuleSet,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]$DnsServerResourceGroupName,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [Microsoft.Azure.Commands.Network.Models.PSVirtualNetwork]$VirtualNetwork,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [Microsoft.Azure.Commands.Network.Models.PSSubnet]$VirtualNetworkSubnet,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [hashtable]$DomainJoinParameters,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]$DnsForwarderRootName,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [int]$DnsForwarderResourceIterator,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [int]$DnsForwarderRedundancyCount,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [System.Security.SecureString]$VmTemporaryPassword
     )
 
@@ -6381,7 +6385,8 @@ function Invoke-AzDnsForwarderDeployment {
                 -odjBlobs $DomainJoinParameters `
                 -encodedForwardingRules $encodedDnsForwardingRuleSet `
                 -ErrorAction Stop
-        } catch {
+        }
+        catch {
             Write-Error -Message "This error message will eventually be replaced by a rollback functionality." -ErrorAction Stop
         }
     }
@@ -6390,10 +6395,10 @@ function Invoke-AzDnsForwarderDeployment {
 function Get-AzDnsForwarderIpAddress {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]$DnsServerResourceGroupName,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string[]]$DnsForwarderName
     )
 
@@ -6410,12 +6415,12 @@ function Get-AzDnsForwarderIpAddress {
 }
 
 function Update-AzVirtualNetworkDnsServers {
-    [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact="High")]
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = "High")]
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [Microsoft.Azure.Commands.Network.Models.PSVirtualNetwork]$VirtualNetwork,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string[]]$DnsForwarderIpAddress
     )
 
@@ -6425,10 +6430,10 @@ function Update-AzVirtualNetworkDnsServers {
     if ($PSCmdlet.ShouldProcess($verboseConfirmMessage, $verboseConfirmMessage, $caption)) {
         if ($null -eq $VirtualNetwork.DhcpOptions.DnsServers) {
             $VirtualNetwork.DhcpOptions.DnsServers = 
-                [System.Collections.Generic.List[string]]::new()
+            [System.Collections.Generic.List[string]]::new()
         }
 
-        foreach($ipAddress in $DnsForwarderIpAddress) {
+        foreach ($ipAddress in $DnsForwarderIpAddress) {
             $VirtualNetwork.DhcpOptions.DnsServers.Add($ipAddress)
         }
         
@@ -6437,49 +6442,49 @@ function Update-AzVirtualNetworkDnsServers {
 }
 
 function New-AzDnsForwarder {
-    [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact="High")]
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = "High")]
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [DnsForwardingRuleSet]$DnsForwardingRuleSet,
 
-        [Parameter(Mandatory=$true, ParameterSetName="NameParameterSet")]
+        [Parameter(Mandatory = $true, ParameterSetName = "NameParameterSet")]
         [string]$VirtualNetworkResourceGroupName,
 
-        [Parameter(Mandatory=$true, ParameterSetName="NameParameterSet")]
+        [Parameter(Mandatory = $true, ParameterSetName = "NameParameterSet")]
         [string]$VirtualNetworkName,
 
-        [Parameter(Mandatory=$true, ParameterSetName="NameParameterSet")]
-        [Parameter(Mandatory=$true, ParameterSetName="VNetObjectParameter")]
+        [Parameter(Mandatory = $true, ParameterSetName = "NameParameterSet")]
+        [Parameter(Mandatory = $true, ParameterSetName = "VNetObjectParameter")]
         [string]$VirtualNetworkSubnetName,
 
-        [Parameter(Mandatory=$true, ParameterSetName="VNetObjectParameter")]
+        [Parameter(Mandatory = $true, ParameterSetName = "VNetObjectParameter")]
         [Microsoft.Azure.Commands.Network.Models.PSVirtualNetwork]$VirtualNetwork,
 
-        [Parameter(Mandatory=$true, ParameterSetName="SubnetObjectParameter")]
+        [Parameter(Mandatory = $true, ParameterSetName = "SubnetObjectParameter")]
         [Microsoft.Azure.Commands.Network.Models.PSSubnet]$VirtualNetworkSubnet,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]$DnsServerResourceGroupName,
         
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]$DnsForwarderRootName = "DnsFwder",
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [System.Security.SecureString]$VmTemporaryPassword,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]$DomainToJoin,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [int]$DnsForwarderRedundancyCount = 2,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [System.Collections.Generic.HashSet[string]]$OnPremDnsHostNames,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [System.Management.Automation.PSCredential]$Credential,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [switch]$SkipParentDomain
     )
 
@@ -6489,18 +6494,18 @@ function New-AzDnsForwarder {
     if ($PSCmdlet.ShouldProcess($verboseConfirmMessage, $verboseConfirmMessage, $caption)) {
         $confirmParameters = @{}
 
-        switch($PSCmdlet.ParameterSetName) {
+        switch ($PSCmdlet.ParameterSetName) {
             "NameParameterSet" {
                 $confirmParameters += @{ 
                     "VirtualNetworkResourceGroupName" = $VirtualNetworkResourceGroupName;
-                    "VirtualNetworkName" = $VirtualNetworkName;
-                    "VirtualNetworkSubnetName" = $VirtualNetworkSubnetName;
+                    "VirtualNetworkName"              = $VirtualNetworkName;
+                    "VirtualNetworkSubnetName"        = $VirtualNetworkSubnetName;
                 }
             }
 
             "VNetObjectParameter" {
                 $confirmParameters += @{
-                    "VirtualNetwork" = $VirtualNetwork;
+                    "VirtualNetwork"           = $VirtualNetwork;
                     "VirtualNetworkSubnetName" = $VirtualNetworkSubnetName
                 }
             }
@@ -6549,10 +6554,11 @@ function New-AzDnsForwarder {
 
             if ($null -eq $dnsServerResourceGroup) { 
                 $dnsServerResourceGroup = New-AzResourceGroup `
-                        -Name $DnsServerResourceGroupName `
-                        -Location $VirtualNetwork.Location
+                    -Name $DnsServerResourceGroupName `
+                    -Location $VirtualNetwork.Location
             }
-        } else {
+        }
+        else {
             $DnsServerResourceGroupName = $VirtualNetwork.ResourceGroupName
         }       
 
@@ -6568,82 +6574,83 @@ function New-AzDnsForwarder {
         }
 
         $domainJoinParameters = Join-AzDnsForwarder `
-                -DomainToJoin $DomainToJoin `
-                -DnsForwarderNames $DnsForwarderNames `
-                -Confirm:$false
+            -DomainToJoin $DomainToJoin `
+            -DnsForwarderNames $DnsForwarderNames `
+            -Confirm:$false
 
         if (!$PSBoundParameters.ContainsKey("VmTemporaryPassword")) {
             $VmTemporaryPassword = Get-RandomString `
-                    -StringLength 15 `
-                    -CaseSensitive `
-                    -AsSecureString
+                -StringLength 15 `
+                -CaseSensitive `
+                -AsSecureString
         }
         
         Invoke-AzDnsForwarderDeployment `
-                -DnsForwardingRuleSet $DnsForwardingRuleSet `
-                -DnsServerResourceGroupName $DnsServerResourceGroupName `
-                -VirtualNetwork $VirtualNetwork `
-                -VirtualNetworkSubnet $VirtualNetworkSubnet `
-                -DomainJoinParameters $domainJoinParameters `
-                -DnsForwarderRootName $DnsForwarderRootName `
-                -DnsForwarderResourceIterator $DnsForwarderResourceIterator `
-                -DnsForwarderRedundancyCount $DnsForwarderRedundancyCount `
-                -VmTemporaryPassword $VmTemporaryPassword `
-                -ErrorAction Stop `
-                -Confirm:$false
+            -DnsForwardingRuleSet $DnsForwardingRuleSet `
+            -DnsServerResourceGroupName $DnsServerResourceGroupName `
+            -VirtualNetwork $VirtualNetwork `
+            -VirtualNetworkSubnet $VirtualNetworkSubnet `
+            -DomainJoinParameters $domainJoinParameters `
+            -DnsForwarderRootName $DnsForwarderRootName `
+            -DnsForwarderResourceIterator $DnsForwarderResourceIterator `
+            -DnsForwarderRedundancyCount $DnsForwarderRedundancyCount `
+            -VmTemporaryPassword $VmTemporaryPassword `
+            -ErrorAction Stop `
+            -Confirm:$false
 
         $ipAddresses = Get-AzDnsForwarderIpAddress `
-                -DnsServerResourceGroupName $DnsServerResourceGroupName `
-                -DnsForwarderName $DnsForwarderNames
+            -DnsServerResourceGroupName $DnsServerResourceGroupName `
+            -DnsForwarderName $DnsForwarderNames
 
         Update-AzVirtualNetworkDnsServers `
-                -VirtualNetwork $VirtualNetwork `
-                -DnsForwarderIpAddress $ipAddresses `
-                -Confirm:$false
+            -VirtualNetwork $VirtualNetwork `
+            -DnsForwarderIpAddress $ipAddresses `
+            -Confirm:$false
 
-        foreach($dnsForwarder in $dnsForwarderNames) {
+        foreach ($dnsForwarder in $dnsForwarderNames) {
             Restart-AzVM `
-                    -ResourceGroupName $DnsServerResourceGroupName `
-                    -Name $dnsForwarder | `
+                -ResourceGroupName $DnsServerResourceGroupName `
+                -Name $dnsForwarder | `
                 Out-Null
         }
 
-        foreach($server in $OnPremDnsHostNames) {
+        foreach ($server in $OnPremDnsHostNames) {
             if ($PSBoundParameters.ContainsKey("Credential")) {
                 $session = Initialize-RemoteSession `
-                        -ComputerName $server `
-                        -Credential $Credential `
-                        -InstallViaCopy `
-                        -OverrideModuleConfig @{ 
-                            SkipPowerShellGetCheck = $true;
-                            SkipAzPowerShellCheck = $true;
-                            SkipDotNetFrameworkCheck = $true
-                        }
-            } else {
+                    -ComputerName $server `
+                    -Credential $Credential `
+                    -InstallViaCopy `
+                    -OverrideModuleConfig @{ 
+                    SkipPowerShellGetCheck   = $true;
+                    SkipAzPowerShellCheck    = $true;
+                    SkipDotNetFrameworkCheck = $true
+                }
+            }
+            else {
                 $session = Initialize-RemoteSession `
-                        -ComputerName $server `
-                        -InstallViaCopy `
-                        -OverrideModuleConfig @{ 
-                            SkipPowerShellGetCheck = $true;
-                            SkipAzPowerShellCheck = $true;
-                            SkipDotNetFrameworkCheck = $true
-                        }
+                    -ComputerName $server `
+                    -InstallViaCopy `
+                    -OverrideModuleConfig @{ 
+                    SkipPowerShellGetCheck   = $true;
+                    SkipAzPowerShellCheck    = $true;
+                    SkipDotNetFrameworkCheck = $true
+                }
             }            
             
             $serializedRuleSet = $DnsForwardingRuleSet | ConvertTo-Json -Compress -Depth 3
             Invoke-Command `
-                    -Session $session `
-                    -ArgumentList $serializedRuleSet, ([string[]]$ipAddresses) `
-                    -ScriptBlock {
-                        $DnsForwardingRuleSet = [DnsForwardingRuleSet]::new(($args[0] | ConvertFrom-Json))
-                        $dnsForwarderIPs = ([string[]]$args[1])
+                -Session $session `
+                -ArgumentList $serializedRuleSet, ([string[]]$ipAddresses) `
+                -ScriptBlock {
+                $DnsForwardingRuleSet = [DnsForwardingRuleSet]::new(($args[0] | ConvertFrom-Json))
+                $dnsForwarderIPs = ([string[]]$args[1])
 
-                        Push-DnsServerConfiguration `
-                                -DnsForwardingRuleSet $DnsForwardingRuleSet `
-                                -OnPremDnsServer `
-                                -AzDnsForwarderIpAddress $dnsForwarderIPs `
-                                -Confirm:$false
-                    }
+                Push-DnsServerConfiguration `
+                    -DnsForwardingRuleSet $DnsForwardingRuleSet `
+                    -OnPremDnsServer `
+                    -AzDnsForwarderIpAddress $dnsForwarderIPs `
+                    -Confirm:$false
+            }
         }    
         
         Clear-DnsClientCacheInternal
@@ -6655,8 +6662,7 @@ function New-AzDnsForwarder {
 #endregion
 
 #region Share level permissions migration cmdlets
-function Move-OnPremSharePermissionsToAzureFileShare
-{
+function Move-OnPremSharePermissionsToAzureFileShare {
     <#
     .SYNOPSIS
     Maps local share permissions to Azure RBAC's built-in roles for files. Applies corresponding built-in roles to domain user's identity in Azure AD.
@@ -6670,27 +6676,27 @@ function Move-OnPremSharePermissionsToAzureFileShare
     #>
 
     Param(
-         [Parameter(Mandatory=$true, Position=0, HelpMessage="Name of the share present on-prem.")]
-         [string]$LocalShareName,
+        [Parameter(Mandatory = $true, Position = 0, HelpMessage = "Name of the share present on-prem.")]
+        [string]$LocalShareName,
 
-         [Parameter(Mandatory=$true, Position=1, HelpMessage="Name of the share on Azure storage account.")]
-         [string]$DestinationShareName,
+        [Parameter(Mandatory = $true, Position = 1, HelpMessage = "Name of the share on Azure storage account.")]
+        [string]$DestinationShareName,
 
-         [Parameter(Mandatory=$true, Position=2, HelpMessage="Resource group name of storage account.")]
-         [string]$ResourceGroupName,
+        [Parameter(Mandatory = $true, Position = 2, HelpMessage = "Resource group name of storage account.")]
+        [string]$ResourceGroupName,
 
-         [Parameter(Mandatory=$true, Position=3, HelpMessage="Storage account name on Azure.")]
-         [string]$StorageAccountName,
+        [Parameter(Mandatory = $true, Position = 3, HelpMessage = "Storage account name on Azure.")]
+        [string]$StorageAccountName,
 
-         [Parameter(Mandatory=$true, Position=4, HelpMessage="If false, the tool just checks for possible errors and reports back without making any changes on the cloud.")]
-         [bool]$CommitChanges,
+        [Parameter(Mandatory = $true, Position = 4, HelpMessage = "If false, the tool just checks for possible errors and reports back without making any changes on the cloud.")]
+        [bool]$CommitChanges,
 
-         [Parameter(Mandatory=$false, Position=5, HelpMessage="If true, ACL migration will be stopped upon failure to lookup local user on Azure AD.")]
-         [bool]$StopOnAADUserLookupFailure = $true,
+        [Parameter(Mandatory = $false, Position = 5, HelpMessage = "If true, ACL migration will be stopped upon failure to lookup local user on Azure AD.")]
+        [bool]$StopOnAADUserLookupFailure = $true,
 
-         [Parameter(Mandatory=$false, Position=6, HelpMessage="If true, permissions will be mapped to closest available on built-in roles in Azure RBAC.")]
-         [bool]$AutoFitSharePermissionsOnAAD = $true
-        )
+        [Parameter(Mandatory = $false, Position = 6, HelpMessage = "If true, permissions will be mapped to closest available on built-in roles in Azure RBAC.")]
+        [bool]$AutoFitSharePermissionsOnAAD = $true
+    )
 
     # Certain accounts in a domain server will not be represented in Azure AD.
     [String[]]$wellKnowAccountName = 'Everyone', 'BUILTIN\Administrators', 'Domain', 'Authenticated Users', 'Users', 'SYSTEM', 'Domain Admins', 'Domain Users'
@@ -6704,34 +6710,28 @@ function Move-OnPremSharePermissionsToAzureFileShare
     $roleAssignmentsPossibleWithoutAnySkips = $True
 
     # Verify the Storage account and file share exist on the cloud.
-    try
-    {
+    try {
         $StorageAccountObj = Get-AzStorageAccount -ResourceGroupName $ResourceGroupName -Name $StorageAccountName -ErrorAction Stop
     }
-    catch
-    {
+    catch {
         Write-Error -Message "Caught exception: $_" -ErrorAction Stop
     }
 
-    if($StorageAccountObj -eq $null)
-    {
+    if ($StorageAccountObj -eq $null) {
         throw "The Storage Account doesn't exist. To create the Storage account and connect it to an active directory, 
                                     please follow the link https://docs.microsoft.com/en-us/azure/storage/files/storage-files-identity-auth-active-directory-enable"
     }
 
-    if($StorageAccountObj.AzureFilesIdentityBasedAuth.DirectoryServiceOptions -ne 'AD')
-    {
+    if ($StorageAccountObj.AzureFilesIdentityBasedAuth.DirectoryServiceOptions -ne 'AD') {
         throw "To Proceed, you need to have Storage Account connected to an Active Directory.
                                         Refer the link for details - https://docs.microsoft.com/en-us/azure/storage/files/storage-files-identity-auth-active-directory-enable"
     }
 
-    try
-    {
-        $accountKey = Get-AzStorageAccountKey -ResourceGroupName $ResourceGroupName -Name $StorageAccountName | Where-Object {$_.KeyName -like "key1"}
+    try {
+        $accountKey = Get-AzStorageAccountKey -ResourceGroupName $ResourceGroupName -Name $StorageAccountName | Where-Object { $_.KeyName -like "key1" }
         $storageAccountContext = New-AzStorageContext -StorageAccountName $StorageAccountName -StorageAccountKey $accountKey.Value
     }
-    catch
-    {
+    catch {
         Write-Error "Caught exception: $_" -ErrorAction Stop
     }
 
@@ -6740,15 +6740,12 @@ function Move-OnPremSharePermissionsToAzureFileShare
     $cloudShare = Get-AzStorageShare -Context $storageAccountContext -Name $DestinationShareName -Erroraction 'silentlycontinue'
 
     # If the destination share does not exist, the following will create a new share.
-    if($cloudShare -eq $null)
-    {
+    if ($cloudShare -eq $null) {
         Write-Verbose -Message  "The Destination Share doesn't exist. Creating a new share with the name provided"
-        try
-        {
+        try {
             $cloudShare = New-AzStorageShare -Name $DestinationShareName -Context $storageAccountContext
         }
-        catch
-        {
+        catch {
             Write-Error "Caught exception: $_" -ErrorAction Stop
         }
     }
@@ -6756,24 +6753,21 @@ function Move-OnPremSharePermissionsToAzureFileShare
     Write-Verbose -Message "Getting the local SMB share access details"
     $localSmbShareAccess = Get-SmbShareAccess -Name $LocalShareName
 
-    if ($localSmbShareAccess -eq $null)
-    {
+    if ($localSmbShareAccess -eq $null) {
         throw "Could not find share with name $LocalShareName."
     }
 
     Write-Host "Local SMB share access details"
 
-    $localSmbShareAccess | Format-Table | Out-String|% {Write-Host $_}
+    $localSmbShareAccess | Format-Table | Out-String | ForEach-Object { Write-Host $_ }
 
     # Run through ACL of the local share.
-    foreach($smbShareAccessControl in $localSmbShareAccess)
-    {
-        $account=$smbShareAccessControl.AccountName
-        $strAccessRight =[string] $smbShareAccessControl.AccessRight
+    foreach ($smbShareAccessControl in $localSmbShareAccess) {
+        $account = $smbShareAccessControl.AccountName
+        $strAccessRight = [string] $smbShareAccessControl.AccessRight
         $strAccessControlType = [string] $smbShareAccessControl.AccessControlType
         
-        if($wellKnownAccountNamesSet.Contains($account))
-        {
+        if ($wellKnownAccountNamesSet.Contains($account)) {
             $roleAssignmentsSkippedAccountsForMissingIdentity.Add($smbShareAccessControl)
             continue
         }
@@ -6784,49 +6778,40 @@ function Move-OnPremSharePermissionsToAzureFileShare
         Write-Verbose -Message "Mapping domain user/group - $account to its corresponding identity on Azure AAD"
 
         #Geting the OID of domain user/group using its SID
-        try
-        {
+        try {
             Request-ConnectMsGraph -Scopes "User.Read.All"
             $aadUser = Get-MgUser -Filter "OnPremisesSecurityIdentifier eq '$strSID'"
         }
-        catch
-        {
+        catch {
             Write-Error "Caught exception: $_" -ErrorAction Stop
         }
 
-        if ($aadUser -ne $null)
-        {
+        if ($aadUser -ne $null) {
             Write-Verbose -Message "Domain user/group's identity retreived from AAD - $($aadUser.UserPrincipalName)"
 
             #Assign Rbac for OID extracted from above.
             $roleDefinition = $null
 
-            If($strAccessControlType.Contains("Allow"))
-            {
-                if($strAccessRight.Contains("Read"))
-                {
+            If ($strAccessControlType.Contains("Allow")) {
+                if ($strAccessRight.Contains("Read")) {
                     # Storage File Data SMB Share Reader - Built in role definition has below Id.
                     $roleDefinition = Get-AzRoleDefinition -Id aba4ae5f-2193-4029-9191-0cb91df5e314
                 }
-                elseif($strAccessRight.Contains("Change"))
-                {
+                elseif ($strAccessRight.Contains("Change")) {
                     # Storage File Data SMB Share Elevated Contributor - Built in role has below Id.
                     $roleDefinition = Get-AzRoleDefinition -Id a7264617-510b-434b-a828-9731dc254ea7
                 }
-                elseif($strAccessRight.Contains("Full") -And $AutoFitSharePermissionsOnAAD -eq $true)
-                {
+                elseif ($strAccessRight.Contains("Full") -And $AutoFitSharePermissionsOnAAD -eq $true) {
                     # Storage File Data SMB Share Elevated Contributor - Built in role has below Id.
                     $roleDefinition = Get-AzRoleDefinition -Id a7264617-510b-434b-a828-9731dc254ea7
                 }
             }
-            else
-            {
+            else {
                 # On deny, User should create custom role definitions.
                 $roleAssignmentsSkippedAccountsForMissingRoles.Add($smbShareAccessControl)
             }
 
-            if ($roleDefinition -ne $null -And $CommitChanges -eq $true)
-            {
+            if ($roleDefinition -ne $null -And $CommitChanges -eq $true) {
                 Write-Verbose -Message "Assigning corresponding RBAC role to the user/group with scope set to the destination share."
 
                 #Constrain the scope to the target file share
@@ -6838,12 +6823,9 @@ function Move-OnPremSharePermissionsToAzureFileShare
                 #Check to see if the role is already assigned to the user/group.
                 $isRoleAssignedAlready = $False;
 
-                if($roleAssignments -ne $null )
-                {
-                    foreach($roleAssignment in $roleAssignments)
-                    {
-                        if($roleAssignment.RoleDefinitionName -eq $roleDefinition.Name)
-                        {
+                if ($roleAssignments -ne $null ) {
+                    foreach ($roleAssignment in $roleAssignments) {
+                        if ($roleAssignment.RoleDefinitionName -eq $roleDefinition.Name) {
                             Write-Verbose -Message "Role assignment present already, skipping"
                             $isRoleAssignedAlready = $True
                             $roleAssignmentsSkippedAccountsForHavingRoleAlready.Add($smbShareAccessControl)
@@ -6852,8 +6834,7 @@ function Move-OnPremSharePermissionsToAzureFileShare
                     }
                 }
 
-                if ($isRoleAssignedAlready -eq $False)
-                {
+                if ($isRoleAssignedAlready -eq $False) {
                     Write-Verbose -Message "Assigning RBAC role to the user/group : $account  with the role : $($roleDefinition.Name)"
                     #Assign the custom role to the target identity with the specified scope.
                     $newRoleAssignment = New-AzRoleAssignment -ObjectId $aadUser.ObjectId -RoleDefinitionId $roleDefinition.Id -Scope $scope
@@ -6863,77 +6844,63 @@ function Move-OnPremSharePermissionsToAzureFileShare
                 }
             }
         }
-        else
-        {
+        else {
             $roleAssignmentsSkippedAccountsForMissingIdentity.Add($smbShareAccessControl)
-            If ($CommitChanges -eq $true)
-            {
-                If ($StopOnAADUserLookupFailure)
-                {
+            If ($CommitChanges -eq $true) {
+                If ($StopOnAADUserLookupFailure) {
                     Write-Error -Message "Could not find an identity on AAD for domain user - '$account'. Please confirm AD connect is complete." -ErrorAction stop
                 }
-                else
-                {
+                else {
                     Write-Error -Message "Could not find an identity on AAD for domain user - '$account', Continuing" -ErrorAction Continue
                 }
             }
         }
     }
 
-    If ($CommitChanges -eq $false)
-    {
-        If ($roleAssignmentsSkippedAccountsForMissingIdentity.Count -ne 0)
-        {
+    If ($CommitChanges -eq $false) {
+        If ($roleAssignmentsSkippedAccountsForMissingIdentity.Count -ne 0) {
             Write-Host "Following Accounts do not have corresponding identities in Azure AD. If you continue, these account's access control will be skipped"
 
             $roleAssignmentsPossibleWithoutAnySkips = $False
-            $roleAssignmentsSkippedAccountsForMissingIdentity | Format-Table | Out-String|% {Write-Host $_}
+            $roleAssignmentsSkippedAccountsForMissingIdentity | Format-Table | Out-String | ForEach-Object { Write-Host $_ }
         }
 
-        If ($roleAssignmentsSkippedAccountsForMissingRoles.Count -ne 0)
-        {
+        If ($roleAssignmentsSkippedAccountsForMissingRoles.Count -ne 0) {
             Write-Host "Following Accounts do not have corresponding access right/control in Azure AD. If you continue, these account's access control will be skipped"
 
             $roleAssignmentsPossibleWithoutAnySkips = $False
-            $roleAssignmentsSkippedAccountsForMissingRoles | Format-Table | Out-String|% {Write-Host $_}
+            $roleAssignmentsSkippedAccountsForMissingRoles | Format-Table | Out-String | ForEach-Object { Write-Host $_ }
         }
     }
-    else
-    {
-        If ($roleAssignmentsSkippedAccountsForMissingIdentity.Count -ne 0)
-        {
+    else {
+        If ($roleAssignmentsSkippedAccountsForMissingIdentity.Count -ne 0) {
             Write-Host "Following Accounts do not have corresponding identities in Azure AD. Skipped ACL migration."
 
-            $roleAssignmentsSkippedAccountsForMissingIdentity | Format-Table | Out-String|% {Write-Host $_}
+            $roleAssignmentsSkippedAccountsForMissingIdentity | Format-Table | Out-String | ForEach-Object { Write-Host $_ }
         }
 
-        If ($roleAssignmentsSkippedAccountsForMissingRoles.Count -ne 0)
-        {
+        If ($roleAssignmentsSkippedAccountsForMissingRoles.Count -ne 0) {
             Write-Host "Following Accounts do not have corresponding access right/control in Azure AD. Skipped ACL migration."
 
-            $roleAssignmentsSkippedAccountsForMissingRoles | Format-Table | Out-String|% {Write-Host $_}
+            $roleAssignmentsSkippedAccountsForMissingRoles | Format-Table | Out-String | ForEach-Object { Write-Host $_ }
         }
 
-        If ($roleAssignmentsSkippedAccountsForHavingRoleAlready.Count -ne 0)
-        {
+        If ($roleAssignmentsSkippedAccountsForHavingRoleAlready.Count -ne 0) {
             Write-Host "Following Accounts already have access to the share at share scope or higher. Skipped ACL migration."
 
-            $roleAssignmentsSkippedAccountsForHavingRoleAlready | Format-Table | Out-String|% {Write-Host $_}
+            $roleAssignmentsSkippedAccountsForHavingRoleAlready | Format-Table | Out-String | ForEach-Object { Write-Host $_ }
         }
 
-        If ($roleAssignmentsDoneAccounts.Count -ne 0)
-        {
+        If ($roleAssignmentsDoneAccounts.Count -ne 0) {
             Write-Host "Below accounts were mapped to Azure AD roles"
 
-            $roleAssignmentsDoneAccounts | Format-Table | Out-String|% {Write-Host $_}
+            $roleAssignmentsDoneAccounts | Format-Table | Out-String | ForEach-Object { Write-Host $_ }
         }
 
-        If ($roleAssignmentsDoneList.Count -ne 0)
-        {
+        If ($roleAssignmentsDoneList.Count -ne 0) {
             Write-Host "`nSuccessful role assignments:"
 
-            foreach($roleAssignment in $roleAssignmentsDoneList)
-            {
+            foreach ($roleAssignment in $roleAssignmentsDoneList) {
                 $roleAssignment
             }
         }
@@ -6967,7 +6934,7 @@ function Invoke-ModuleConfigPopulate {
 
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$false, Position=0)]
+        [Parameter(Mandatory = $false, Position = 0)]
         [hashtable]$OverrideModuleConfig
     )
 
@@ -6975,7 +6942,8 @@ function Invoke-ModuleConfigPopulate {
 
     if ($OverrideModuleConfig.ContainsKey("AzurePrivateDnsIp")) {
         $script:AzurePrivateDnsIp = $OverrideModuleConfig["AzurePrivateDnsIp"]
-    } else {
+    }
+    else {
         $script:AzurePrivateDnsIp = $DefaultModuleConfig["AzurePrivateDnsIp"]
     }
 
@@ -6984,18 +6952,19 @@ function Invoke-ModuleConfigPopulate {
         $v = [Version]$null
         if (![Version]::TryParse($OverrideModuleConfig["DnsForwarderTemplateVersion"], [ref]$v)) {
             Write-Error `
-                    -Message "Unexpected DnsForwarderTemplateVersion version value specified in overrides." `
-                    -ErrorAction Stop
+                -Message "Unexpected DnsForwarderTemplateVersion version value specified in overrides." `
+                -ErrorAction Stop
         }
 
         $script:DnsForwarderTemplateVersion = $v
-    } else {
+    }
+    else {
         $script:DnsForwarderTemplateVersion = [Version]$null
         $v = [Version]$null
         if (![Version]::TryParse($DefaultModuleConfig["DnsForwarderTemplateVersion"], [ref]$v)) {
             Write-Error `
-                    -Message "Unexpected DnsForwarderTemplateVersion version value specified in AzFilesHybrid DefaultModuleConfig." `
-                    -ErrorAction Stop
+                -Message "Unexpected DnsForwarderTemplateVersion version value specified in AzFilesHybrid DefaultModuleConfig." `
+                -ErrorAction Stop
         }
         
         $script:DnsForwarderTemplateVersion = $v
@@ -7003,42 +6972,46 @@ function Invoke-ModuleConfigPopulate {
 
     if ($OverrideModuleConfig.ContainsKey("DnsForwarderTemplate")) {
         $script:DnsForwarderTemplate = $OverrideModuleConfig["DnsForwarderTemplate"]
-    } else {
+    }
+    else {
         $script:DnsForwarderTemplate = $DefaultModuleConfig["DnsForwarderTemplate"]
     }
 
     if ($OverrideModuleConfig.ContainsKey("SkipPowerShellGetCheck")) {
         $script:SkipPowerShellGetCheck = $OverrideModuleConfig["SkipPowerShellGetCheck"]
-    } else {
+    }
+    else {
         $script:SkipPowerShellGetCheck = $DefaultModuleConfig["SkipPowerShellGetCheck"]
     }
 
     if ($OverrideModuleConfig.ContainsKey("SkipAzPowerShellCheck")) {
         $script:SkipAzPowerShellCheck = $OverrideModuleConfig["SkipAzPowerShellCheck"]
-    } else {
+    }
+    else {
         $script:SkipAzPowerShellCheck = $DefaultModuleConfig["SkipAzPowerShellCheck"]
     }
 
     if ($OverrideModuleConfig.ContainsKey("SkipDotNetFrameworkCheck")) {
         $script:SkipDotNetFrameworkCheck = $OverrideModuleConfig["SkipDotNetFrameworkCheck"]
-    } else {
+    }
+    else {
         $script:SkipDotNetFrameworkCheck = $DefaultModuleConfig["SkipDotNetFrameworkCheck"]
     }
 }
 
 Invoke-ModuleConfigPopulate `
-        -OverrideModuleConfig $OverrideModuleConfig
+    -OverrideModuleConfig $OverrideModuleConfig
 
 if ((Get-OSPlatform) -eq "Windows") {
     if ($PSVersionTable.PSEdition -eq "Desktop") {
         if (!$SkipDotNetFrameworkCheck) {
             Assert-DotNetFrameworkVersion `
-                    -DotNetFrameworkVersion "Framework4.7.2"
+                -DotNetFrameworkVersion "Framework4.7.2"
         }
     }
 
     [Net.ServicePointManager]::SecurityProtocol = ([Net.SecurityProtocolType]::Tls12 -bor `
-        [Net.SecurityProtocolType]::Tls13)
+            [Net.SecurityProtocolType]::Tls13)
 }
 
 if (!$SkipPowerShellGetCheck) {
@@ -7049,3 +7022,219 @@ if (!$SkipAzPowerShellCheck) {
     Request-AzPowerShellModule
 }
 #endregion
+
+# SIG # Begin signature block
+# MIInxAYJKoZIhvcNAQcCoIIntTCCJ7ECAQExDzANBglghkgBZQMEAgEFADB5Bgor
+# BgEEAYI3AgEEoGswaTA0BgorBgEEAYI3AgEeMCYCAwEAAAQQH8w7YFlLCE63JNLG
+# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCByC77j+Zcnmt4G
+# uUjPofgR0w48FmE2BLD9JB2z6G6wbaCCDXYwggX0MIID3KADAgECAhMzAAADTrU8
+# esGEb+srAAAAAANOMA0GCSqGSIb3DQEBCwUAMH4xCzAJBgNVBAYTAlVTMRMwEQYD
+# VQQIEwpXYXNoaW5ndG9uMRAwDgYDVQQHEwdSZWRtb25kMR4wHAYDVQQKExVNaWNy
+# b3NvZnQgQ29ycG9yYXRpb24xKDAmBgNVBAMTH01pY3Jvc29mdCBDb2RlIFNpZ25p
+# bmcgUENBIDIwMTEwHhcNMjMwMzE2MTg0MzI5WhcNMjQwMzE0MTg0MzI5WjB0MQsw
+# CQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9u
+# ZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMR4wHAYDVQQDExVNaWNy
+# b3NvZnQgQ29ycG9yYXRpb24wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIB
+# AQDdCKiNI6IBFWuvJUmf6WdOJqZmIwYs5G7AJD5UbcL6tsC+EBPDbr36pFGo1bsU
+# p53nRyFYnncoMg8FK0d8jLlw0lgexDDr7gicf2zOBFWqfv/nSLwzJFNP5W03DF/1
+# 1oZ12rSFqGlm+O46cRjTDFBpMRCZZGddZlRBjivby0eI1VgTD1TvAdfBYQe82fhm
+# WQkYR/lWmAK+vW/1+bO7jHaxXTNCxLIBW07F8PBjUcwFxxyfbe2mHB4h1L4U0Ofa
+# +HX/aREQ7SqYZz59sXM2ySOfvYyIjnqSO80NGBaz5DvzIG88J0+BNhOu2jl6Dfcq
+# jYQs1H/PMSQIK6E7lXDXSpXzAgMBAAGjggFzMIIBbzAfBgNVHSUEGDAWBgorBgEE
+# AYI3TAgBBggrBgEFBQcDAzAdBgNVHQ4EFgQUnMc7Zn/ukKBsBiWkwdNfsN5pdwAw
+# RQYDVR0RBD4wPKQ6MDgxHjAcBgNVBAsTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjEW
+# MBQGA1UEBRMNMjMwMDEyKzUwMDUxNjAfBgNVHSMEGDAWgBRIbmTlUAXTgqoXNzci
+# tW2oynUClTBUBgNVHR8ETTBLMEmgR6BFhkNodHRwOi8vd3d3Lm1pY3Jvc29mdC5j
+# b20vcGtpb3BzL2NybC9NaWNDb2RTaWdQQ0EyMDExXzIwMTEtMDctMDguY3JsMGEG
+# CCsGAQUFBwEBBFUwUzBRBggrBgEFBQcwAoZFaHR0cDovL3d3dy5taWNyb3NvZnQu
+# Y29tL3BraW9wcy9jZXJ0cy9NaWNDb2RTaWdQQ0EyMDExXzIwMTEtMDctMDguY3J0
+# MAwGA1UdEwEB/wQCMAAwDQYJKoZIhvcNAQELBQADggIBAD21v9pHoLdBSNlFAjmk
+# mx4XxOZAPsVxxXbDyQv1+kGDe9XpgBnT1lXnx7JDpFMKBwAyIwdInmvhK9pGBa31
+# TyeL3p7R2s0L8SABPPRJHAEk4NHpBXxHjm4TKjezAbSqqbgsy10Y7KApy+9UrKa2
+# kGmsuASsk95PVm5vem7OmTs42vm0BJUU+JPQLg8Y/sdj3TtSfLYYZAaJwTAIgi7d
+# hzn5hatLo7Dhz+4T+MrFd+6LUa2U3zr97QwzDthx+RP9/RZnur4inzSQsG5DCVIM
+# pA1l2NWEA3KAca0tI2l6hQNYsaKL1kefdfHCrPxEry8onJjyGGv9YKoLv6AOO7Oh
+# JEmbQlz/xksYG2N/JSOJ+QqYpGTEuYFYVWain7He6jgb41JbpOGKDdE/b+V2q/gX
+# UgFe2gdwTpCDsvh8SMRoq1/BNXcr7iTAU38Vgr83iVtPYmFhZOVM0ULp/kKTVoir
+# IpP2KCxT4OekOctt8grYnhJ16QMjmMv5o53hjNFXOxigkQWYzUO+6w50g0FAeFa8
+# 5ugCCB6lXEk21FFB1FdIHpjSQf+LP/W2OV/HfhC3uTPgKbRtXo83TZYEudooyZ/A
+# Vu08sibZ3MkGOJORLERNwKm2G7oqdOv4Qj8Z0JrGgMzj46NFKAxkLSpE5oHQYP1H
+# tPx1lPfD7iNSbJsP6LiUHXH1MIIHejCCBWKgAwIBAgIKYQ6Q0gAAAAAAAzANBgkq
+# hkiG9w0BAQsFADCBiDELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24x
+# EDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlv
+# bjEyMDAGA1UEAxMpTWljcm9zb2Z0IFJvb3QgQ2VydGlmaWNhdGUgQXV0aG9yaXR5
+# IDIwMTEwHhcNMTEwNzA4MjA1OTA5WhcNMjYwNzA4MjEwOTA5WjB+MQswCQYDVQQG
+# EwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwG
+# A1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSgwJgYDVQQDEx9NaWNyb3NvZnQg
+# Q29kZSBTaWduaW5nIFBDQSAyMDExMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIIC
+# CgKCAgEAq/D6chAcLq3YbqqCEE00uvK2WCGfQhsqa+laUKq4BjgaBEm6f8MMHt03
+# a8YS2AvwOMKZBrDIOdUBFDFC04kNeWSHfpRgJGyvnkmc6Whe0t+bU7IKLMOv2akr
+# rnoJr9eWWcpgGgXpZnboMlImEi/nqwhQz7NEt13YxC4Ddato88tt8zpcoRb0Rrrg
+# OGSsbmQ1eKagYw8t00CT+OPeBw3VXHmlSSnnDb6gE3e+lD3v++MrWhAfTVYoonpy
+# 4BI6t0le2O3tQ5GD2Xuye4Yb2T6xjF3oiU+EGvKhL1nkkDstrjNYxbc+/jLTswM9
+# sbKvkjh+0p2ALPVOVpEhNSXDOW5kf1O6nA+tGSOEy/S6A4aN91/w0FK/jJSHvMAh
+# dCVfGCi2zCcoOCWYOUo2z3yxkq4cI6epZuxhH2rhKEmdX4jiJV3TIUs+UsS1Vz8k
+# A/DRelsv1SPjcF0PUUZ3s/gA4bysAoJf28AVs70b1FVL5zmhD+kjSbwYuER8ReTB
+# w3J64HLnJN+/RpnF78IcV9uDjexNSTCnq47f7Fufr/zdsGbiwZeBe+3W7UvnSSmn
+# Eyimp31ngOaKYnhfsi+E11ecXL93KCjx7W3DKI8sj0A3T8HhhUSJxAlMxdSlQy90
+# lfdu+HggWCwTXWCVmj5PM4TasIgX3p5O9JawvEagbJjS4NaIjAsCAwEAAaOCAe0w
+# ggHpMBAGCSsGAQQBgjcVAQQDAgEAMB0GA1UdDgQWBBRIbmTlUAXTgqoXNzcitW2o
+# ynUClTAZBgkrBgEEAYI3FAIEDB4KAFMAdQBiAEMAQTALBgNVHQ8EBAMCAYYwDwYD
+# VR0TAQH/BAUwAwEB/zAfBgNVHSMEGDAWgBRyLToCMZBDuRQFTuHqp8cx0SOJNDBa
+# BgNVHR8EUzBRME+gTaBLhklodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpL2Ny
+# bC9wcm9kdWN0cy9NaWNSb29DZXJBdXQyMDExXzIwMTFfMDNfMjIuY3JsMF4GCCsG
+# AQUFBwEBBFIwUDBOBggrBgEFBQcwAoZCaHR0cDovL3d3dy5taWNyb3NvZnQuY29t
+# L3BraS9jZXJ0cy9NaWNSb29DZXJBdXQyMDExXzIwMTFfMDNfMjIuY3J0MIGfBgNV
+# HSAEgZcwgZQwgZEGCSsGAQQBgjcuAzCBgzA/BggrBgEFBQcCARYzaHR0cDovL3d3
+# dy5taWNyb3NvZnQuY29tL3BraW9wcy9kb2NzL3ByaW1hcnljcHMuaHRtMEAGCCsG
+# AQUFBwICMDQeMiAdAEwAZQBnAGEAbABfAHAAbwBsAGkAYwB5AF8AcwB0AGEAdABl
+# AG0AZQBuAHQALiAdMA0GCSqGSIb3DQEBCwUAA4ICAQBn8oalmOBUeRou09h0ZyKb
+# C5YR4WOSmUKWfdJ5DJDBZV8uLD74w3LRbYP+vj/oCso7v0epo/Np22O/IjWll11l
+# hJB9i0ZQVdgMknzSGksc8zxCi1LQsP1r4z4HLimb5j0bpdS1HXeUOeLpZMlEPXh6
+# I/MTfaaQdION9MsmAkYqwooQu6SpBQyb7Wj6aC6VoCo/KmtYSWMfCWluWpiW5IP0
+# wI/zRive/DvQvTXvbiWu5a8n7dDd8w6vmSiXmE0OPQvyCInWH8MyGOLwxS3OW560
+# STkKxgrCxq2u5bLZ2xWIUUVYODJxJxp/sfQn+N4sOiBpmLJZiWhub6e3dMNABQam
+# ASooPoI/E01mC8CzTfXhj38cbxV9Rad25UAqZaPDXVJihsMdYzaXht/a8/jyFqGa
+# J+HNpZfQ7l1jQeNbB5yHPgZ3BtEGsXUfFL5hYbXw3MYbBL7fQccOKO7eZS/sl/ah
+# XJbYANahRr1Z85elCUtIEJmAH9AAKcWxm6U/RXceNcbSoqKfenoi+kiVH6v7RyOA
+# 9Z74v2u3S5fi63V4GuzqN5l5GEv/1rMjaHXmr/r8i+sLgOppO6/8MO0ETI7f33Vt
+# Y5E90Z1WTk+/gFcioXgRMiF670EKsT/7qMykXcGhiJtXcVZOSEXAQsmbdlsKgEhr
+# /Xmfwb1tbWrJUnMTDXpQzTGCGaQwghmgAgEBMIGVMH4xCzAJBgNVBAYTAlVTMRMw
+# EQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYDVQQHEwdSZWRtb25kMR4wHAYDVQQKExVN
+# aWNyb3NvZnQgQ29ycG9yYXRpb24xKDAmBgNVBAMTH01pY3Jvc29mdCBDb2RlIFNp
+# Z25pbmcgUENBIDIwMTECEzMAAANOtTx6wYRv6ysAAAAAA04wDQYJYIZIAWUDBAIB
+# BQCggbAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEO
+# MAwGCisGAQQBgjcCARUwLwYJKoZIhvcNAQkEMSIEIKL+uQJmls6n54vKRbcxuWX/
+# HLQJaMKPx7Eiaky0LlYRMEQGCisGAQQBgjcCAQwxNjA0oBSAEgBNAGkAYwByAG8A
+# cwBvAGYAdKEcgBpodHRwczovL3d3dy5taWNyb3NvZnQuY29tIDANBgkqhkiG9w0B
+# AQEFAASCAQA8E1a/jZr0KR5vPmCkPaxUA/24S3C2xUfwX7ZEUhAPUxHnWh6TsTMz
+# jP0ayHH0LqOupQ5vS2T0krBPsaqxElixvAReFKy7MQPMKRYTmC7bmdrQgFsG0sDf
+# JWoBam9mrUgxsOGSfCqLhp2vXhdSTeZfBR9+FEJX2fm3ZdGEtl49HNR76PCze2yt
+# jx4Dqesl0xi1s+xGurCv0gXKUws5WVgig3t3qJWciyjAkkviSCMVDuRp0cijO381
+# lARdG7fF+rfWEph7Rga4FPKczNvtd359waudVoZqcIIkORD5Zifi+LBn4okvgyz1
+# rL2DkJlZVd890eQHK32uWrgCHZBkSfd2oYIXLDCCFygGCisGAQQBgjcDAwExghcY
+# MIIXFAYJKoZIhvcNAQcCoIIXBTCCFwECAQMxDzANBglghkgBZQMEAgEFADCCAVkG
+# CyqGSIb3DQEJEAEEoIIBSASCAUQwggFAAgEBBgorBgEEAYRZCgMBMDEwDQYJYIZI
+# AWUDBAIBBQAEIEYwtLcgml1hxWDGmPf48UwFx4gRHw+6z4YUNx3slnVBAgZk3lIw
+# HgQYEzIwMjMwODI5MjI1MDA2Ljg2M1owBIACAfSggdikgdUwgdIxCzAJBgNVBAYT
+# AlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYDVQQHEwdSZWRtb25kMR4wHAYD
+# VQQKExVNaWNyb3NvZnQgQ29ycG9yYXRpb24xLTArBgNVBAsTJE1pY3Jvc29mdCBJ
+# cmVsYW5kIE9wZXJhdGlvbnMgTGltaXRlZDEmMCQGA1UECxMdVGhhbGVzIFRTUyBF
+# U046MDg0Mi00QkU2LUMyOUExJTAjBgNVBAMTHE1pY3Jvc29mdCBUaW1lLVN0YW1w
+# IFNlcnZpY2WgghF7MIIHJzCCBQ+gAwIBAgITMwAAAbJuQAN/bqmUkgABAAABsjAN
+# BgkqhkiG9w0BAQsFADB8MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3Rv
+# bjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0
+# aW9uMSYwJAYDVQQDEx1NaWNyb3NvZnQgVGltZS1TdGFtcCBQQ0EgMjAxMDAeFw0y
+# MjA5MjAyMDIyMDFaFw0yMzEyMTQyMDIyMDFaMIHSMQswCQYDVQQGEwJVUzETMBEG
+# A1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWlj
+# cm9zb2Z0IENvcnBvcmF0aW9uMS0wKwYDVQQLEyRNaWNyb3NvZnQgSXJlbGFuZCBP
+# cGVyYXRpb25zIExpbWl0ZWQxJjAkBgNVBAsTHVRoYWxlcyBUU1MgRVNOOjA4NDIt
+# NEJFNi1DMjlBMSUwIwYDVQQDExxNaWNyb3NvZnQgVGltZS1TdGFtcCBTZXJ2aWNl
+# MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAyqJlMh17+VDisL4GaXl/
+# 9a6r/EpPGt9sbbceh+ZD6pkA3gbI7vc8XfL04B+m3tB/aNyV1Y4ZQH4fMG7CWVjI
+# /d/HgxjzO+4C4HfsW+jK2c0LYMqdWtWUc5VwZQv0KeaEM0wDb+eySMh/YiiIb0nS
+# otivx268d1An0uLY+r2C7JJv2a9QvrSiCyUI72CSHoWIQPAyvBSvxaNrqMWlROfL
+# y2DQ3RycI3bDh8qSnmplxtRgViJwtJv/oDukcK1frGeOrCGYmiJve+QonJXFu4Ut
+# GFVfEf3lvQsd42GJ+feO+jaP7/hBXXSMSldVb6IL0GxO1Hr3G9ONTnVmA/sFHhgM
+# RarsmzKVI6/kHlMdMNdF/XzhRHMWFPJvw5lApjuaoyHtzwnzDWwQzhcNQXZRk3Lz
+# b01ULMba190RdlofEXxGbGlBgHHKFnBjWui24hL6B83Z6r6GQBPeKkafz8qYPAO3
+# MBud+5eMCmB5mrCBxgnykMn7L/FTqi7MnPUG97lNOKGSIDvBCxB7pHrRmT10903P
+# DQwrmeJHO5BkC3gYj3oWGOGVRZxRk4KS/8lcz84a7+uBKmVjB2Y8vPN8O1fK7L8Y
+# JTkjiXTyDqKJ9fKkyChiSRx44ADPi/HXHQE6dlZ8jd9LCo1S+g3udxNP4wHhWm9/
+# VAGmmMEBBS6+6Lp4IbQwJU0CAwEAAaOCAUkwggFFMB0GA1UdDgQWBBSZ8ieAXNkR
+# mU+SMM5WW4FIMNpqcTAfBgNVHSMEGDAWgBSfpxVdAF5iXYP05dJlpxtTNRnpcjBf
+# BgNVHR8EWDBWMFSgUqBQhk5odHRwOi8vd3d3Lm1pY3Jvc29mdC5jb20vcGtpb3Bz
+# L2NybC9NaWNyb3NvZnQlMjBUaW1lLVN0YW1wJTIwUENBJTIwMjAxMCgxKS5jcmww
+# bAYIKwYBBQUHAQEEYDBeMFwGCCsGAQUFBzAChlBodHRwOi8vd3d3Lm1pY3Jvc29m
+# dC5jb20vcGtpb3BzL2NlcnRzL01pY3Jvc29mdCUyMFRpbWUtU3RhbXAlMjBQQ0El
+# MjAyMDEwKDEpLmNydDAMBgNVHRMBAf8EAjAAMBYGA1UdJQEB/wQMMAoGCCsGAQUF
+# BwMIMA4GA1UdDwEB/wQEAwIHgDANBgkqhkiG9w0BAQsFAAOCAgEA3Ee27cXMhpto
+# NtaqzB0oGUCEpdEI37kJIyK/ZNhriLZC5Yib732mLACEOEAN9uqivXPIuL3ljoZC
+# e8hZSB14LugvVm1nJ73bNgr4Qh/BhmaFL4IfiKd8DNS+xwdkXfCWslR89QgMZU/S
+# UJhWx72aC68bR2qRjhrJA8Qc68m5uBllo52D83x0id3p8Z45z7QOgbMH4uJ45snZ
+# DQC0S3dc3eJfwKnr51lNfzHAT8u+FHA+lv/6cqyE7tNW696fB1PCoH8tPoI09oSX
+# AV4rEqupFM8xsd6D6L4qcEt/CaERewyDazVBfskjF+9P3qZ3R6IyOIwQ7bYts7OY
+# sw13csg2jACdEEAm1f7f97f3QH2wwYwen5rVX6GCzrYCikGXSn/TSWLfQM3nARDk
+# h/flmTtv9PqkTHqslQNgK2LvMJuKSMpNqcGc5z33MYyV6Plf58L+TkTFQKs6zf9X
+# MZEJm3ku9VBJ1aqr9AzNMSaKbixvMBIr2KYSSM21lnK8LUKxRwPW+gWS2V3iYoyM
+# T64MRXch10P4OtGT3idXM09K5ld7B9U6dcdJ6obvEzdXt+XZovi/U6Evb4nA7VPH
+# cHSKs7U72ps10mTfnlue13VFJUqAzbYoUEeegvsmzulGEGJoqZVNAag5v6PVBrur
+# 5yLEajjxWH2TfkEOwlL8MuhcVI8OXiYwggdxMIIFWaADAgECAhMzAAAAFcXna54C
+# m0mZAAAAAAAVMA0GCSqGSIb3DQEBCwUAMIGIMQswCQYDVQQGEwJVUzETMBEGA1UE
+# CBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9z
+# b2Z0IENvcnBvcmF0aW9uMTIwMAYDVQQDEylNaWNyb3NvZnQgUm9vdCBDZXJ0aWZp
+# Y2F0ZSBBdXRob3JpdHkgMjAxMDAeFw0yMTA5MzAxODIyMjVaFw0zMDA5MzAxODMy
+# MjVaMHwxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYDVQQH
+# EwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3NvZnQgQ29ycG9yYXRpb24xJjAkBgNV
+# BAMTHU1pY3Jvc29mdCBUaW1lLVN0YW1wIFBDQSAyMDEwMIICIjANBgkqhkiG9w0B
+# AQEFAAOCAg8AMIICCgKCAgEA5OGmTOe0ciELeaLL1yR5vQ7VgtP97pwHB9KpbE51
+# yMo1V/YBf2xK4OK9uT4XYDP/XE/HZveVU3Fa4n5KWv64NmeFRiMMtY0Tz3cywBAY
+# 6GB9alKDRLemjkZrBxTzxXb1hlDcwUTIcVxRMTegCjhuje3XD9gmU3w5YQJ6xKr9
+# cmmvHaus9ja+NSZk2pg7uhp7M62AW36MEBydUv626GIl3GoPz130/o5Tz9bshVZN
+# 7928jaTjkY+yOSxRnOlwaQ3KNi1wjjHINSi947SHJMPgyY9+tVSP3PoFVZhtaDua
+# Rr3tpK56KTesy+uDRedGbsoy1cCGMFxPLOJiss254o2I5JasAUq7vnGpF1tnYN74
+# kpEeHT39IM9zfUGaRnXNxF803RKJ1v2lIH1+/NmeRd+2ci/bfV+AutuqfjbsNkz2
+# K26oElHovwUDo9Fzpk03dJQcNIIP8BDyt0cY7afomXw/TNuvXsLz1dhzPUNOwTM5
+# TI4CvEJoLhDqhFFG4tG9ahhaYQFzymeiXtcodgLiMxhy16cg8ML6EgrXY28MyTZk
+# i1ugpoMhXV8wdJGUlNi5UPkLiWHzNgY1GIRH29wb0f2y1BzFa/ZcUlFdEtsluq9Q
+# BXpsxREdcu+N+VLEhReTwDwV2xo3xwgVGD94q0W29R6HXtqPnhZyacaue7e3Pmri
+# Lq0CAwEAAaOCAd0wggHZMBIGCSsGAQQBgjcVAQQFAgMBAAEwIwYJKwYBBAGCNxUC
+# BBYEFCqnUv5kxJq+gpE8RjUpzxD/LwTuMB0GA1UdDgQWBBSfpxVdAF5iXYP05dJl
+# pxtTNRnpcjBcBgNVHSAEVTBTMFEGDCsGAQQBgjdMg30BATBBMD8GCCsGAQUFBwIB
+# FjNodHRwOi8vd3d3Lm1pY3Jvc29mdC5jb20vcGtpb3BzL0RvY3MvUmVwb3NpdG9y
+# eS5odG0wEwYDVR0lBAwwCgYIKwYBBQUHAwgwGQYJKwYBBAGCNxQCBAweCgBTAHUA
+# YgBDAEEwCwYDVR0PBAQDAgGGMA8GA1UdEwEB/wQFMAMBAf8wHwYDVR0jBBgwFoAU
+# 1fZWy4/oolxiaNE9lJBb186aGMQwVgYDVR0fBE8wTTBLoEmgR4ZFaHR0cDovL2Ny
+# bC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljUm9vQ2VyQXV0XzIw
+# MTAtMDYtMjMuY3JsMFoGCCsGAQUFBwEBBE4wTDBKBggrBgEFBQcwAoY+aHR0cDov
+# L3d3dy5taWNyb3NvZnQuY29tL3BraS9jZXJ0cy9NaWNSb29DZXJBdXRfMjAxMC0w
+# Ni0yMy5jcnQwDQYJKoZIhvcNAQELBQADggIBAJ1VffwqreEsH2cBMSRb4Z5yS/yp
+# b+pcFLY+TkdkeLEGk5c9MTO1OdfCcTY/2mRsfNB1OW27DzHkwo/7bNGhlBgi7ulm
+# ZzpTTd2YurYeeNg2LpypglYAA7AFvonoaeC6Ce5732pvvinLbtg/SHUB2RjebYIM
+# 9W0jVOR4U3UkV7ndn/OOPcbzaN9l9qRWqveVtihVJ9AkvUCgvxm2EhIRXT0n4ECW
+# OKz3+SmJw7wXsFSFQrP8DJ6LGYnn8AtqgcKBGUIZUnWKNsIdw2FzLixre24/LAl4
+# FOmRsqlb30mjdAy87JGA0j3mSj5mO0+7hvoyGtmW9I/2kQH2zsZ0/fZMcm8Qq3Uw
+# xTSwethQ/gpY3UA8x1RtnWN0SCyxTkctwRQEcb9k+SS+c23Kjgm9swFXSVRk2XPX
+# fx5bRAGOWhmRaw2fpCjcZxkoJLo4S5pu+yFUa2pFEUep8beuyOiJXk+d0tBMdrVX
+# VAmxaQFEfnyhYWxz/gq77EFmPWn9y8FBSX5+k77L+DvktxW/tM4+pTFRhLy/AsGC
+# onsXHRWJjXD+57XQKBqJC4822rpM+Zv/Cuk0+CQ1ZyvgDbjmjJnW4SLq8CdCPSWU
+# 5nR0W2rRnj7tfqAxM328y+l7vzhwRNGQ8cirOoo6CGJ/2XBjU02N7oJtpQUQwXEG
+# ahC0HVUzWLOhcGbyoYIC1zCCAkACAQEwggEAoYHYpIHVMIHSMQswCQYDVQQGEwJV
+# UzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UE
+# ChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMS0wKwYDVQQLEyRNaWNyb3NvZnQgSXJl
+# bGFuZCBPcGVyYXRpb25zIExpbWl0ZWQxJjAkBgNVBAsTHVRoYWxlcyBUU1MgRVNO
+# OjA4NDItNEJFNi1DMjlBMSUwIwYDVQQDExxNaWNyb3NvZnQgVGltZS1TdGFtcCBT
+# ZXJ2aWNloiMKAQEwBwYFKw4DAhoDFQCOEn4R7JJF+fYoI2yOf1wX0BRJOqCBgzCB
+# gKR+MHwxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYDVQQH
+# EwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3NvZnQgQ29ycG9yYXRpb24xJjAkBgNV
+# BAMTHU1pY3Jvc29mdCBUaW1lLVN0YW1wIFBDQSAyMDEwMA0GCSqGSIb3DQEBBQUA
+# AgUA6Jih7DAiGA8yMDIzMDgzMDAwNTcxNloYDzIwMjMwODMxMDA1NzE2WjB3MD0G
+# CisGAQQBhFkKBAExLzAtMAoCBQDomKHsAgEAMAoCAQACAhZKAgH/MAcCAQACAhQU
+# MAoCBQDomfNsAgEAMDYGCisGAQQBhFkKBAIxKDAmMAwGCisGAQQBhFkKAwKgCjAI
+# AgEAAgMHoSChCjAIAgEAAgMBhqAwDQYJKoZIhvcNAQEFBQADgYEAgaeMbHIqpz4k
+# bBpkTSdFf39QtBUVBb4v81fQsTC4L8EEDc18lz1npg/jRrr8fEfMFABu4nIuhWDI
+# b6Gf/bn2Ry4iU2cLWoo1xpcbEQOzgDDONwJza7N8QnMUIxd37+IkuAqELcm1tLAa
+# Yn/a9EwMr8p9pzzVvDVP/nZX9d7GnbExggQNMIIECQIBATCBkzB8MQswCQYDVQQG
+# EwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwG
+# A1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSYwJAYDVQQDEx1NaWNyb3NvZnQg
+# VGltZS1TdGFtcCBQQ0EgMjAxMAITMwAAAbJuQAN/bqmUkgABAAABsjANBglghkgB
+# ZQMEAgEFAKCCAUowGgYJKoZIhvcNAQkDMQ0GCyqGSIb3DQEJEAEEMC8GCSqGSIb3
+# DQEJBDEiBCA7qtB5qW5yPTqEVz9Dk2zW2Ne7LIqJUXp23umbKO5qsDCB+gYLKoZI
+# hvcNAQkQAi8xgeowgecwgeQwgb0EIFN4zjzn4T63g8RWJ5SgUpfs9XIuj+fO76G0
+# k8IbTj41MIGYMIGApH4wfDELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0
+# b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3Jh
+# dGlvbjEmMCQGA1UEAxMdTWljcm9zb2Z0IFRpbWUtU3RhbXAgUENBIDIwMTACEzMA
+# AAGybkADf26plJIAAQAAAbIwIgQgyxjc2PH4lbSMp31bmqI6xEfOxYTSYAJvYvHm
+# rAG4J/8wDQYJKoZIhvcNAQELBQAEggIAGi1tOdo5mu1lWsTCYqVbahvuheneLXDc
+# ubnNB6ndgC1oNd+/6v640BQCjTvyzYIeMGMghBhSvBklh2PCC3pcNglRf0/7j2mA
+# oUUHyb69DJ0ni1HyZ47rKsaB5jilzZlokaAM83G/fhRPy/EjGzAxNPoAD/jXIEdr
+# 4WLBsPE8EmAaSjPd6hMcQobGZJRVErIeJEG/YtxzIQJ4EKeBiwDU5xpMUUpB27cX
+# ATiNLrR73uyF37EfMgjrLU4XTRU/yVuvfUIGSGnVonbs3X9E7OEjI0G6W8Ha76LZ
+# jyE9pZI2kNVpbCy56+HwCxpPOzhz8nukseuKFEF+YI2wK1PgNe2ZcnkKrA8hrGOd
+# DshyVlCPNvn+WRzjyzXdNwYCA2bzJXoIe9OPw+KbFkhBRP4vpkqtKohqxhGRo48E
+# ab0ZmQFqmJW99YQjjeSBrIyFWm8uKlHsZvQ1xT72I5/LBnaEhCNfp5JUJskoQVao
+# kLV0Qkb5PThHZ8bmuJnGLnmxH8qPONuThG3NMHgCQwZwVfmgSORaTU9zJyg7+syu
+# mQurEQoNnw+cA7QtulE3lVIWU1NY2YKXtZd945DdpsYIlUMY2grr/htV9kJPBoM9
+# jNlNHs1f/rodLnzWX6yVNT1fxxPT6dtQadKncx/qH9CQFXXOcNI+IPz5p97AdILW
+# F7CBZAoDo/Y=
+# SIG # End signature block
