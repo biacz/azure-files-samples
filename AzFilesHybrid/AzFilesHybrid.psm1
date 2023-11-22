@@ -1473,7 +1473,7 @@ function Rename-ADObjectWithConfirmation {
     .DESCRIPTION
     Rename an ADObject with extra confirmation if the new name is different than the original name. If the names are equivalent, nothing happens.
     .EXAMPLE
-    Rename-ADObjectWithConfirmation -ADObject $ADOBJECT -NewName $SOME_STRING
+    Rename-ADObjectWithConfirmation -ADObject $ADOBJECT -NewName $SOME_STRING -ADCredentials $ADCredentials
     # 
     #>
     [CmdletBinding()]
@@ -1492,14 +1492,8 @@ function Rename-ADObjectWithConfirmation {
     $existingADObjectName = $ADObject.Name
     if ($NewName -ne $existingADObjectName) {
         Write-Host "Existing AD Object Name: $existingADObjectName ; New AD Object Name: $NewName"
-        # $message = "`nWould you like to replace the AD Object Name with $NewName instead?"
-        # $options = [System.Management.Automation.Host.ChoiceDescription[]]("&Yes", "&No")
-        # $result = $host.ui.PromptForChoice($title, $message, $options, 0)
-        #if ($result -eq 0) {
-            Rename-ADObject -Identity $ADObject -NewName $NewName -Credential $ADCredentials
-        #}
+        Rename-ADObject -Identity $ADObject -NewName $NewName -Credential $ADCredentials
     }
-
 }
 
 
@@ -2556,7 +2550,7 @@ function New-ADAccountForStorageAccount {
             - Creates a user identity in Active Directory using "kerb1" key as the identity's password.
             - Sets the spn value of the new identity to be "cifs\<storageaccountname>.file.core.windows.net
     .EXAMPLE
-        PS C:\> New-ADAccountForStorageAccount -StorageAccountName "storageAccount" -ResourceGroupName "resourceGroup"
+        PS C:\> New-ADAccountForStorageAccount -StorageAccountName "storageAccount" -ResourceGroupName "resourceGroup" -ADCredentials $ADCredentials
     #>
 
     [CmdletBinding()]
@@ -2574,11 +2568,9 @@ function New-ADAccountForStorageAccount {
         [string]$Domain,
 
         [Parameter(Mandatory = $false, Position = 4)]
-        # [Parameter(Mandatory=$false, Position=4, ParameterSetName="OUQuickName")]
         [string]$OrganizationalUnit,
 
         [Parameter(Mandatory = $false, Position = 4)]
-        # [Parameter(Mandatory=$false, Position=4, ParameterSetName="OUDistinguishedName")]
         [string]$OrganizationalUnitDistinguishedName,
 
         [Parameter(Mandatory = $false, Position = 5)]
@@ -4505,6 +4497,8 @@ function Update-AzStorageAccountADObjectPassword {
     .PARAMETER RotateToKerbKey
     The kerb key of the storage account that the AD object representing the storage account in your DC 
     will be set to.
+    .PARAMETER ADCredentials
+    Provide a set of ADCredentials to execute for the AD operations
     .PARAMETER ResourceGroupName
     The name of the resource group containing the storage account. If you specify the StorageAccount 
     parameter you do not need to specify ResourceGroupName. 
@@ -4521,10 +4515,10 @@ function Update-AzStorageAccountADObjectPassword {
     
     .Example 
     PS> $storageAccount = Get-AzStorageAccount -ResourceGroupName "myResourceGroup" -Name "myStorageAccount"
-    PS> Update-AzStorageAccountADObjectPassword -RotateToKerbKey kerb2 -StorageAccount $storageAccount 
+    PS> Update-AzStorageAccountADObjectPassword -RotateToKerbKey kerb2 -StorageAccount $storageAccount
     
     .Example
-    PS> Get-AzStorageAccount -ResourceGroupName "myResourceGroup" | Update-AzStorageAccountADObjectPassword -RotateToKerbKey
+    PS> Get-AzStorageAccount -ResourceGroupName "myResourceGroup" | Update-AzStorageAccountADObjectPassword -RotateToKerbKey -ADCredentials $ADCredentials
     
     In this example, note that a specific storage account has not been specified to 
     Get-AzStorageAccount. This means Get-AzStorageAccount will pipe every storage account 
@@ -4599,15 +4593,6 @@ function Update-AzStorageAccountADObjectPassword {
         Assert-IsSupportedDistinguishedName -DistinguishedName $adObj.DistinguishedName
         
         write-verbose -message "Set password on AD object $($adObj.SamAccountName) for $($StorageAccount.StorageAccountName) to value of $RotateToKerbKey." -verbose
-        # $caption = ("Set password on AD object " + $adObj.SamAccountName + `
-        #         " for " + $StorageAccount.StorageAccountName + " to value of $RotateToKerbKey.")
-        # $verboseConfirmMessage = ("This action will change the password for the indicated AD object " + `
-        #         "from $otherKerbKeyName to $RotateToKerbKey. This is intended to be a two-stage " + `
-        #         "process: rotate from kerb1 to kerb2 (kerb2 will be regenerated on the storage " + `
-        #         "account before being set), wait several hours, and then rotate back to kerb1 " + `
-        #         "(this cmdlet will likewise regenerate kerb1).")
-
-        #if ($PSCmdlet.ShouldProcess($verboseConfirmMessage, $verboseConfirmMessage, $caption)) {
         Write-Verbose -Message "Desire to rotate password confirmed."
         
         Write-Verbose -Message ("Regenerate $RotateToKerbKey on " + $StorageAccount.StorageAccountName)
@@ -4631,14 +4616,8 @@ function Update-AzStorageAccountADObjectPassword {
             Where-Object { $_.KeyName -eq $RotateToKerbKey } | `
             Select-Object -ExpandProperty Value  
 
-        # $otherKerbKey = $kerbKeys | `
-        #     Where-Object { $_.KeyName -eq $otherKerbKeyName } | `
-        #     Select-Object -ExpandProperty Value
-
-        # $oldPassword = ConvertTo-SecureString -String $otherKerbKey -AsPlainText -Force
         $newPassword = ConvertTo-SecureString -String $kerbKey -AsPlainText -Force
 
-        # if ($Force.ToBool()) {
         Write-Verbose -Message ("Attempt reset on " + $adObj.SamAccountName + " to $RotateToKerbKey")
         Set-ADAccountPassword `
             -Identity $adObj `
@@ -4647,22 +4626,9 @@ function Update-AzStorageAccountADObjectPassword {
             -NewPassword $newPassword `
             -Server $domain `
             -ErrorAction Stop
-        # } else {
-        #     Write-Verbose `
-        #         -Message ("Change password on " + $adObj.SamAccountName + " from $otherKerbKeyName to $RotateToKerbKey.")
-        #     Set-ADAccountPassword `
-        #         -Identity $adObj `
-        #         -OldPassword $oldPassword `
-        #         -NewPassword $newPassword `
-        #         -ErrorAction Stop
-        # }
 
         Write-Verbose -Message "Password changed successfully."
     }
-        #else {
-        #    Write-Verbose -Message ("Password for " + $adObj.SamAccountName + " for storage account " + `
-        #            $StorageAccount.StorageAccountName + " not changed.")
-        #}        
 }
 
 function Invoke-AzStorageAccountADObjectPasswordRotation {
@@ -4677,11 +4643,13 @@ function Invoke-AzStorageAccountADObjectPasswordRotation {
     The name of the storage account to be rotated. 
     .PARAMETER StorageAccount
     The storage account to be rotated.
+    .PARAMETER ADCredentials
+    specify adcredentials to run your ad cmdlets against
     .EXAMPLE
-    PS> Invoke-AzStorageAccountADObjectPasswordRotation -ResourceGroupName "myResourceGroup" -StorageAccountName "mystorageaccount123"
+    PS> Invoke-AzStorageAccountADObjectPasswordRotation -ResourceGroupName "myResourceGroup" -StorageAccountName "mystorageaccount123" -ADCredentials $ADCredentials
     .EXAMPLE
     PS> $storageAccounts = Get-AzStorageAccount -ResourceGroupName "myResourceGroup"
-    PS> $storageAccounts | Invoke-AzStorageAccountADObjectPasswordRotation
+    PS> $storageAccounts | Invoke-AzStorageAccountADObjectPasswordRotation -ADCredentials $ADCredentials
     #>
 
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = "High")]
@@ -4784,16 +4752,8 @@ function Invoke-AzStorageAccountADObjectPasswordRotation {
             }
         }
 
-        # $caption = "Rotate from Kerberos key $RotateFromKerbKey to $RotateToKerbKey."
-        # $verboseConfirmMessage = "This action will rotate the password from $RotateFromKerbKey to $RotateToKerbKey using Update-AzStorageAccountADObjectPassword." 
-        
-        #if ($PSCmdlet.ShouldProcess($verboseConfirmMessage, $verboseConfirmMessage, $caption)) {
-            write-verbose -message "This action will rotate the password from $RotateFromKerbKey to $RotateToKerbKey using Update-AzStorageAccountADObjectPassword." -verbose
-            Update-AzStorageAccountADObjectPassword @updateParams -ADCredentials $ADCredentials
-        #}
-        #else {
-        #    Write-Verbose -Message "No password rotation performed."
-        #}
+        write-verbose -message "This action will rotate the password from $RotateFromKerbKey to $RotateToKerbKey using Update-AzStorageAccountADObjectPassword." -verbose
+        Update-AzStorageAccountADObjectPassword @updateParams -ADCredentials $ADCredentials
     }
 }
 
@@ -4914,7 +4874,7 @@ function Update-AzStorageAccountAuthForAES256 {
             -Domain $domain `
             -Force
 
-        write-verbose -message "blabla kerb update" -verbose
+        write-verbose -message "kerb key update" -verbose
         Update-AzStorageAccountADObjectPassword -RotateToKerbKey kerb2 -ResourceGroupname $ResourceGroupName -StorageAccountName $StorageAccountName -ADCredentials $ADCredentials -ErrorAction Stop
     }
 }
@@ -4944,6 +4904,8 @@ function Join-AzStorageAccount {
     service logon account.
     .PARAMETER OrganizationalUnitName
     The organizational unit for the AD object to be added to. This parameter is optional, but many environments will require it.
+    .PARAMETER ADCredentials
+    specify ad creds to run the AD cmdlet portion against
     .PARAMETER OrganizationalUnitDistinguishedName
     The distinguished name of the organizational unit (i.e. "OU=Workstations,DC=contoso,DC=com"). This parameter is optional, but many environments will require it.
     .PARAMETER ADObjectNameOverride
@@ -4958,9 +4920,9 @@ function Join-AzStorageAccount {
     PS> Join-AzStorageAccount -ResourceGroupName "myResourceGroup" -StorageAccountName "myStorageAccount" -Domain "subsidiary.corp.contoso.com" -DomainAccountType ComputerAccount -OrganizationalUnitName "StorageAccountsOU"
     .EXAMPLE 
     PS> $storageAccount = Get-AzStorageAccount -ResourceGroupName "myResourceGroup" -Name "myStorageAccount"
-    PS> Join-AzStorageAccount -StorageAccount $storageAccount -Domain "subsidiary.corp.contoso.com" -DomainAccountType ComputerAccount -OrganizationalUnitName "StorageAccountsOU"
+    PS> Join-AzStorageAccount -StorageAccount $storageAccount -Domain "subsidiary.corp.contoso.com" -DomainAccountType ComputerAccount -OrganizationalUnitName "StorageAccountsOU" -ADCredentials $ADCredentials
     .EXAMPLE
-    PS> Get-AzStorageAccount -ResourceGroupName "myResourceGroup" | Join-AzStorageAccount -Domain "subsidiary.corp.contoso.com" -DomainAccountType ComputerAccount -OrganizationalUnitName "StorageAccountsOU"
+    PS> Get-AzStorageAccount -ResourceGroupName "myResourceGroup" | Join-AzStorageAccount -Domain "subsidiary.corp.contoso.com" -DomainAccountType ComputerAccount -OrganizationalUnitName "StorageAccountsOU" -ADCredentials $ADCredentials
     In this example, note that a specific storage account has not been specified to 
     Get-AzStorageAccount. This means Get-AzStorageAccount will pipe every storage account 
     in the resource group myResourceGroup to Join-AzStorageAccount.
